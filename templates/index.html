@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>noemi · board</title>
+<style>
+:root {
+    --paper: #fff8ef; --card: #ffffff; --ink: #3a2a22; --soft: #8a7466; --line: #efdcc8;
+    --rose: #e11d48; --orange: #f97316; --sky: #0ea5e9; --leaf: #16a34a; --gold: #d97706;
+    --sky-bg: #eaf6fd; --leaf-bg: #eaf8ee; --gold-bg: #fdf3e0;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font: 15px/1.5 "Trebuchet MS", "Segoe UI", sans-serif; }
+body.lock { overflow: hidden; }
+h1, h2, h3, .serif { font-family: Georgia, "Times New Roman", serif; }
+button { font: inherit; cursor: pointer; }
+input { font: inherit; }
+.mono { font-family: Consolas, "Courier New", monospace; }
+.soft { color: var(--soft); }
+
+/* ---------- top toolbar ---------- */
+.bar { position: sticky; top: 0; z-index: 20; background: rgba(255,248,239,0.94); backdrop-filter: blur(6px);
+       border-bottom: 2px solid var(--line); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 12px 20px; }
+.logo { font-family: Georgia, serif; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+.logo span { color: var(--rose); font-style: italic; }
+.logo::before { content: ""; display: inline-block; width: 14px; height: 14px; margin-right: 8px; border-radius: 50%;
+                background: linear-gradient(135deg, var(--rose), var(--orange)); }
+.urlbox { display: flex; flex: 1 1 360px; min-width: 260px; background: #fff; border: 2px solid var(--line); border-radius: 999px; padding: 4px; }
+.urlbox:focus-within { border-color: var(--orange); }
+.urlbox input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; padding: 6px 14px; }
+.pill { border: 0; border-radius: 999px; padding: 8px 16px; background: var(--ink); color: #fff; font-weight: 700; }
+.pill:hover { filter: brightness(1.2); }
+.pill.rose { background: linear-gradient(135deg, var(--rose), var(--orange)); }
+.pill.ghost { background: #fff; color: var(--ink); border: 2px solid var(--line); }
+.pill.ghost:hover { border-color: var(--orange); filter: none; }
+.pill.sm { padding: 5px 12px; font-size: 13px; }
+.pill:disabled { opacity: 0.5; cursor: wait; }
+.acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.search { flex: 0 1 200px; min-width: 140px; border: 2px solid var(--line); border-radius: 999px; padding: 7px 14px; background: #fff; outline: 0; }
+.search:focus { border-color: var(--orange); }
+.hint { width: 100%; margin: 0; font-size: 13px; color: var(--soft); }
+
+/* ---------- kanban board ---------- */
+.board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding: 20px; align-items: start; }
+.col { border-radius: 18px; padding: 0 12px 14px; background: var(--tint); border: 2px solid var(--edge); }
+.col header { display: flex; align-items: center; gap: 10px; padding: 16px 6px 12px; }
+.col header h2 { margin: 0; font-size: 20px; flex: 1; }
+.col header .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--edge); }
+.count { background: var(--edge); color: #fff; border-radius: 999px; padding: 1px 11px; font-weight: 700; font-size: 14px; }
+.cards { display: flex; flex-direction: column; gap: 12px; }
+.card { background: var(--card); border-radius: 14px; padding: 13px 14px 11px 18px; position: relative; box-shadow: 0 2px 0 rgba(58,42,34,0.07), 0 8px 18px -12px rgba(58,42,34,0.35); }
+.card::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 5px; border-radius: 0 6px 6px 0; background: var(--edge); }
+.card h3 { margin: 0; font-size: 17px; overflow-wrap: anywhere; }
+.card .meta { color: var(--soft); font-size: 13px; }
+.card .foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 9px; flex-wrap: wrap; }
+.card.flash { animation: flash 2.4s ease-out; }
+@keyframes flash { 0% { background: #fff1c2; transform: scale(1.02); } 100% { background: #fff; transform: none; } }
+.tag { display: inline-block; padding: 1px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; background: var(--tint); color: var(--edge); border: 1px solid var(--edge); }
+.round { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--line); background: #fff; color: var(--ink); display: inline-grid; place-items: center; padding: 0; }
+.round:hover { border-color: var(--orange); }
+.round.del:hover { border-color: var(--rose); color: var(--rose); }
+.tools { display: flex; gap: 6px; }
+.empty { text-align: center; color: var(--soft); border: 2px dashed var(--edge); border-radius: 14px; padding: 22px 12px; background: rgba(255,255,255,0.5); }
+.local { --edge: var(--sky); --tint: var(--sky-bg); }
+.imported { --edge: var(--leaf); --tint: var(--leaf-bg); }
+.partner { --edge: var(--gold); --tint: var(--gold-bg); }
+.colnote { font-size: 12px; color: var(--soft); padding: 0 6px 10px; margin: -6px 0 0; }
+
+/* ---------- side sheet ---------- */
+.veil { position: fixed; inset: 0; background: rgba(58,42,34,0.45); z-index: 40; }
+.sheet { position: fixed; z-index: 41; top: 0; right: 0; bottom: 0; width: min(430px, 100%); background: var(--paper); border-left: 3px solid var(--ink);
+         display: flex; flex-direction: column; box-shadow: -18px 0 40px rgba(58,42,34,0.3); }
+.sheet[hidden], .veil[hidden] { display: none; }
+.sheet header { display: flex; align-items: center; gap: 10px; padding: 16px 18px; border-bottom: 2px solid var(--line); }
+.sheet header h2 { margin: 0; flex: 1; font-size: 22px; }
+.sbody { padding: 18px; overflow: auto; }
+.form { display: grid; gap: 12px; }
+.form label span { display: block; font-size: 12px; font-weight: 700; color: var(--soft); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.form input[type=text], .form input[type=number], .form input[type=url] { width: 100%; border: 2px solid var(--line); border-radius: 12px; padding: 9px 12px; background: #fff; outline: 0; }
+.form input:focus { border-color: var(--orange); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* id-card style details */
+.idcard { background: #fff; border: 2px solid var(--ink); border-radius: 16px; overflow: hidden; }
+.idcard .band { background: linear-gradient(135deg, var(--edge), var(--ink)); color: #fff; padding: 18px; display: flex; align-items: center; gap: 14px; }
+.idcard .face { width: 60px; height: 60px; border-radius: 50%; background: #fff; color: var(--edge); font: 700 22px Georgia, serif; display: grid; place-items: center; flex: none; }
+.idcard h3 { margin: 0; font-size: 21px; }
+.idcard dl { margin: 0; padding: 6px 18px 14px; display: grid; grid-template-columns: auto 1fr; gap: 0 18px; }
+.idcard dt { color: var(--soft); padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; }
+.idcard dd { margin: 0; padding: 8px 0; border-bottom: 1px dashed var(--line); font-weight: 700; overflow-wrap: anywhere; }
+
+/* send receipt */
+.receipt { margin-top: 16px; background: #fff; border: 2px dashed var(--leaf); border-radius: 14px; padding: 16px; position: relative; }
+.receipt .stamp { position: absolute; top: 12px; right: 14px; transform: rotate(8deg); border: 3px solid var(--leaf); color: var(--leaf); border-radius: 8px; padding: 0 8px; font: 700 15px Georgia, serif; letter-spacing: 0.1em; }
+.receipt h4 { margin: 0 0 2px; font: 700 18px Georgia, serif; }
+.receipt table { border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 14px; }
+.receipt td { padding: 5px 0; border-bottom: 1px dotted var(--line); }
+.receipt td:first-child { color: var(--soft); width: 38%; }
+
+/* explorer */
+.eps { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.eps button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.code { background: #2a1d17; color: #ffe9cf; border-radius: 12px; padding: 14px; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 380px; overflow: auto; margin-top: 12px; }
+.stat { display: inline-block; font-weight: 700; padding: 2px 10px; border-radius: 6px; }
+.stat.ok { background: var(--leaf-bg); color: var(--leaf); }
+.stat.bad { background: #fde8ec; color: var(--rose); }
+
+/* confirm modal + toasts */
+.dim { position: fixed; inset: 0; z-index: 60; background: rgba(58,42,34,0.55); display: grid; place-items: center; padding: 16px; }
+.dialog { background: var(--paper); border: 3px solid var(--ink); border-radius: 22px; padding: 24px; width: min(400px, 100%); text-align: center; box-shadow: 8px 8px 0 var(--ink); }
+.dialog .icon { font-size: 34px; }
+.dialog h3 { margin: 4px 0 6px; font-size: 22px; }
+.dialog p { margin: 0 0 18px; color: var(--soft); }
+.dialog .row { justify-content: center; }
+#toasts { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 70; width: min(520px, calc(100% - 24px)); pointer-events: none; }
+.toast { background: var(--ink); color: #fff; border-radius: 999px; padding: 10px 20px; text-align: center; box-shadow: 0 10px 24px rgba(58,42,34,0.35); animation: drop 0.25s; overflow-wrap: anywhere; }
+.toast.bad { background: var(--rose); }
+@keyframes drop { from { transform: translateY(-12px); opacity: 0; } }
+
+/* ---------- phones: columns become a swipeable strip, sheet becomes a bottom sheet ---------- */
+@media (max-width: 900px) {
+    .bar { padding: 10px 12px; gap: 10px; }
+    .board { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; padding: 14px 12px 28px; -webkit-overflow-scrolling: touch; }
+    .col { flex: 0 0 86%; scroll-snap-align: center; }
+    .search { flex: 1 1 100%; }
+    .sheet { top: auto; left: 0; width: 100%; max-height: 92vh; border-left: 0; border-top: 3px solid var(--ink); border-radius: 22px 22px 0 0; }
+    .two { grid-template-columns: 1fr; }
+    #toasts { top: 12px; }
+}
+@media (pointer: coarse) {
+    input { font-size: 16px; }
+    .pill { min-height: 44px; }
+    .pill.sm { min-height: 40px; }
+    .round { width: 44px; height: 44px; }
+}
+</style>
+</head>
+<body>
+<header class="bar">
+    <div class="logo">noemi<span>board</span></div>
+    <div class="urlbox">
+        <input type="url" id="pUrl" placeholder="http://203.0.113.10/api/students" aria-label="Partner API URL">
+        <button class="pill rose" id="bRetrieve">Retrieve</button>
+    </div>
+    <div class="acts">
+        <button class="pill" id="bNew">+ New card</button>
+        <button class="pill ghost" id="bSend">Send a record</button>
+        <button class="pill ghost" id="bTools">Explorer</button>
+        <button class="pill ghost" id="bShare">Share my API</button>
+    </div>
+    <input type="search" class="search" id="q" placeholder="Search my cards" aria-label="Search my cards">
+    <p class="hint" id="hint">Enter your partner's AWS Static IP or domain and press Retrieve. Save a partner card to move it into Imported.</p>
+</header>
+
+<main class="board">
+    <section class="col local" aria-label="My records">
+        <header><span class="dot"></span><h2>My Records</h2><span class="count" id="cLocal">0</span></header>
+        <p class="colnote">Source: your own SQLite database (Local)</p>
+        <div class="cards" id="kLocal"></div>
+    </section>
+    <section class="col imported" aria-label="Imported and received">
+        <header><span class="dot"></span><h2>Imported &amp; Received</h2><span class="count" id="cImported">0</span></header>
+        <p class="colnote">Saved from a classmate, or sent to you by one</p>
+        <div class="cards" id="kImported"></div>
+    </section>
+    <section class="col partner" aria-label="Partner records">
+        <header><span class="dot"></span><h2>Classmate's Records</h2><span class="count" id="cPartner">0</span></header>
+        <p class="colnote" id="partnerNote">Read-only: records from your partner's API</p>
+        <div class="cards" id="kPartner"></div>
+    </section>
+</main>
+
+<div class="veil" id="veil" hidden></div>
+<aside class="sheet" id="sheet" hidden role="dialog" aria-modal="true">
+    <header><h2 id="sTitle"></h2><button class="pill ghost sm" id="sClose">Close</button></header>
+    <div class="sbody" id="sBody"></div>
+</aside>
+<div id="toasts"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const JH = {'Content-Type': 'application/json'};
+const state = {records: [], partner: [], flash: null};
+
+/* tiny DOM builder: values are inserted as text, never as HTML */
+function h(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+        if (k === 'class') n.className = v;
+        else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+        else if (v === true) n.setAttribute(k, '');
+        else if (v !== false && v != null) n.setAttribute(k, v);
+    }
+    kids.flat().forEach(c => { if (c != null && c !== false) n.append(c.nodeType ? c : document.createTextNode(String(c))); });
+    return n;
+}
+const isLocal = r => (r.source || 'Local') === 'Local';
+const initials = n => String(n || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+function toast(msg, bad) { const t = h('div', {class: 'toast' + (bad ? ' bad' : '')}, msg); $('#toasts').append(t); setTimeout(() => t.remove(), 4000); }
+async function api(url, opts) {
+    const r = await fetch(url, opts); let d = null; try { d = await r.json(); } catch (e) { /* not JSON */ }
+    if (!r.ok) throw new Error((d && (d.error || d.message)) || 'Request failed (' + r.status + ')');
+    return d;
+}
+async function busy(btn, fn) { const l = btn.textContent; btn.disabled = true; btn.textContent = '…'; try { await fn(); } finally { btn.disabled = false; btn.textContent = l; } }
+
+/* ---------- confirm dialog ---------- */
+function ask(icon, title, text, okLabel, danger) {
+    return new Promise(resolve => {
+        const done = v => { document.removeEventListener('keydown', onKey); dim.remove(); resolve(v); };
+        const onKey = e => { if (e.key === 'Escape') done(false); };
+        const no = h('button', {class: 'pill ghost', type: 'button', onclick: () => done(false)}, 'Cancel');
+        const yes = h('button', {class: 'pill ' + (danger ? 'rose' : ''), type: 'button', onclick: () => done(true)}, okLabel || 'OK');
+        const dim = h('div', {class: 'dim', onclick: e => { if (e.target === dim) done(false); }},
+            h('div', {class: 'dialog', role: 'dialog', 'aria-modal': 'true'}, h('div', {class: 'icon'}, icon), h('h3', {}, title), h('p', {}, text), h('div', {class: 'row'}, no, yes)));
+        document.addEventListener('keydown', onKey); document.body.append(dim); no.focus();
+    });
+}
+
+/* ---------- sheet ---------- */
+const sheetOpen = () => !$('#sheet').hidden;
+function openSheet(title, ...nodes) { $('#sTitle').textContent = title; $('#sBody').replaceChildren(...nodes); $('#sheet').hidden = false; $('#veil').hidden = false; document.body.classList.add('lock'); }
+function closeSheet() { $('#sheet').hidden = true; $('#veil').hidden = true; document.body.classList.remove('lock'); }
+$('#sClose').onclick = closeSheet; $('#veil').onclick = closeSheet;
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && sheetOpen() && !$('.dim')) closeSheet(); });
+
+/* ---------- cards ---------- */
+function card(r, kind) {
+    const tools = h('div', {class: 'tools'});
+    const round = (label, glyph, fn, cls) => h('button', {class: 'round ' + (cls || ''), 'aria-label': label, title: label, onclick: fn}, glyph);
+    if (kind === 'partner') {
+        tools.append(round('View details', 'ⓘ', () => details(r, true)));
+        tools.append(h('button', {class: 'pill sm rose', onclick: e => save(r, e.currentTarget)}, 'Save →'));
+    } else {
+        tools.append(round('View details', 'ⓘ', () => details(r, false)), round('Edit', '✎', () => form(r)), round('Delete', '✕', () => remove(r), 'del'));
+    }
+    const fresh = state.flash === r.id && kind === 'imported';
+    return h('article', {class: 'card' + (fresh ? ' flash' : '')},
+        h('h3', {}, r.name), h('div', {class: 'meta mono'}, r.student_id),
+        h('div', {class: 'meta'}, `${r.program} · Year ${r.year} · Sec ${r.section}`),
+        h('div', {class: 'foot'}, h('span', {class: 'tag'}, r.source || 'No source'), tools));
+}
+function fill(sel, rows, kind, emptyText) {
+    $(sel).replaceChildren(...(rows.length ? rows.map(r => card(r, kind)) : [h('div', {class: 'empty'}, emptyText)]));
+}
+function render() {
+    const q = $('#q').value.toLowerCase().trim();
+    const mine = state.records.filter(r => !q || [r.name, r.student_id, r.program, r.source].some(v => String(v).toLowerCase().includes(q)));
+    const local = mine.filter(isLocal), imp = mine.filter(r => !isLocal(r));
+    fill('#kLocal', local, 'local', 'No local cards. Press “+ New card”.');
+    fill('#kImported', imp, 'imported', 'Nothing imported yet. Retrieve, then press “Save →”.');
+    fill('#kPartner', state.partner, 'partner', 'Press Retrieve to load your partner’s records.');
+    $('#cLocal').textContent = state.records.filter(isLocal).length;
+    $('#cImported').textContent = state.records.filter(r => !isLocal(r)).length;
+    $('#cPartner').textContent = state.partner.length;
+}
+$('#q').oninput = render;
+async function load(silent) { try { state.records = await api('/api/students'); render(); } catch (e) { if (!silent) toast(e.message, true); } }
+
+/* ---------- details (ID card) ---------- */
+function details(r, remote) {
+    const row = (k, v) => [h('dt', {}, k), h('dd', {}, v ?? 'N/A')];
+    const edge = remote ? 'var(--gold)' : isLocal(r) ? 'var(--sky)' : 'var(--leaf)';
+    const nodes = [h('div', {class: 'idcard', style: `--edge:${edge}`},
+        h('div', {class: 'band'}, h('div', {class: 'face'}, initials(r.name)), h('div', {}, h('h3', {}, r.name), h('div', {class: 'mono'}, r.student_id))),
+        h('dl', {}, row('Program', r.program), row('Year', r.year), row('Section', r.section), row('Database ID', r.id), row('Source', r.source || 'not provided')))];
+    if (remote) nodes.push(h('div', {class: 'row', style: 'margin-top:16px'}, h('button', {class: 'pill rose', onclick: async e => { await save(r, e.currentTarget); closeSheet(); }}, 'Save to my database →')));
+    openSheet(remote ? "Classmate's record" : 'Record details', ...nodes);
+}
+
+/* ---------- add / edit ---------- */
+function form(rec) {
+    const edit = !!rec, f = Object.assign({student_id: '', name: '', program: '', year: '', section: ''}, rec), i = {};
+    const fld = (k, label, type) => { i[k] = h('input', {type: type || 'text', value: f[k] ?? '', required: true, min: k === 'year' ? 1 : null}); return h('label', {}, h('span', {}, label), i[k]); };
+    const el = h('form', {class: 'form', onsubmit: async e => {
+        e.preventDefault();
+        const body = {student_id: i.student_id.value.trim(), name: i.name.value.trim(), program: i.program.value.trim(), year: Number(i.year.value), section: i.section.value.trim(), source: 'Local'};
+        try { await api(edit ? '/api/students/' + rec.id : '/api/students', {method: edit ? 'PUT' : 'POST', headers: JH, body: JSON.stringify(body)}); toast(edit ? 'Card updated' : 'Card added'); closeSheet(); await load(); }
+        catch (err) { toast(err.message, true); }
+    }}, fld('student_id', 'Student ID'), fld('name', 'Name'), h('div', {class: 'two'}, fld('program', 'Program'), fld('year', 'Year', 'number')), fld('section', 'Section'),
+        h('div', {class: 'row'}, h('button', {class: 'pill rose', type: 'submit'}, edit ? 'Save changes' : 'Add card'), h('button', {class: 'pill ghost', type: 'button', onclick: closeSheet}, 'Cancel')));
+    openSheet(edit ? 'Edit card' : 'New card', el); i.student_id.focus();
+}
+async function remove(r) {
+    if (!await ask('🗑️', 'Delete this card?', `${r.name} (${r.student_id}) will be removed from your database. This cannot be undone.`, 'Delete', true)) return;
+    try { await api('/api/students/' + r.id, {method: 'DELETE'}); toast('Card deleted'); await load(); } catch (e) { toast(e.message, true); }
+}
+
+/* ---------- partner ---------- */
+async function retrieve() {
+    const url = $('#pUrl').value.trim();
+    await busy($('#bRetrieve'), async () => {
+        $('#hint').textContent = 'Retrieving partner records…';
+        try {
+            const data = await api('/partner-records?url=' + encodeURIComponent(url));
+            if (!Array.isArray(data)) throw new Error('Partner API did not return a list.');
+            state.partner = data; render();
+            const host = url ? new URL(url).hostname : 'the server default';
+            $('#partnerNote').textContent = 'Read-only · from ' + host;
+            $('#hint').textContent = `Retrieved ${data.length} record(s) from ${host}.`; toast(`Retrieved ${data.length} classmate record(s)`);
+        } catch (e) { $('#hint').textContent = 'Error: ' + e.message; toast(e.message, true); }
+    });
+}
+$('#bRetrieve').onclick = retrieve;
+async function save(r, btn) {
+    const run = async () => {
+        try {
+            await api('/import-student', {method: 'POST', headers: JH, body: JSON.stringify(r)});
+            await load(); state.flash = Math.max(...state.records.map(x => x.id)); render(); toast(`${r.name} moved to Imported`);
+        } catch (e) { toast(e.message, true); }
+    };
+    if (btn) await busy(btn, run); else await run();
+}
+
+/* ---------- send (sheet) ---------- */
+const HTTP = {200: 'OK', 201: 'Created', 400: 'Bad Request', 404: 'Not Found', 409: 'Conflict', 500: 'Server Error', 502: 'Bad Gateway'};
+function parseReply(raw) { if (typeof raw === 'string') { try { raw = JSON.parse(raw); } catch (e) { return {message: raw}; } } return raw || {}; }
+const replyText = raw => { const r = parseReply(raw); return r.message || r.error || 'No message'; };
+function receipt(sent, status, raw) {
+    const reply = parseReply(raw), id = reply.id ?? (reply.student && reply.student.id), tr = (k, v) => h('tr', {}, h('td', {}, k), h('td', {}, v ?? 'N/A'));
+    return h('div', {class: 'receipt'}, h('div', {class: 'stamp'}, 'SENT'), h('h4', {}, 'Record sent to partner'),
+        h('div', {class: 'soft'}, `Partner replied ${status} ${HTTP[status] || ''}`),
+        h('table', {}, tr('Student ID', sent.student_id), tr('Name', sent.name), tr('Program', sent.program), tr('Year', sent.year), tr('Section', sent.section), tr('Source', 'Partner API')),
+        h('p', {style: 'margin:10px 0 0;color:var(--leaf);font-weight:700'}, replyText(raw) + (id !== undefined ? ` (stored as ID ${id})` : '')));
+}
+function sendSheet() {
+    const f = {}, out = h('div', {});
+    const fld = (k, label, val, ph, type) => { f[k] = h('input', {type: type || 'text', value: val, placeholder: ph}); return h('label', {}, h('span', {}, label), f[k]); };
+    const el = h('div', {class: 'form'},
+        h('p', {class: 'soft', style: 'margin:0'}, 'Fill in a fictional record. It goes to the partner URL in the toolbar.'),
+        fld('student_id', 'Student ID', 'EXT-005', 'EXT-005'), fld('name', 'Name', 'Isko Navarro', 'Isko Navarro'),
+        h('div', {class: 'two'}, fld('program', 'Program', 'BSIT', 'BSIT'), fld('year', 'Year', '1', '1', 'number')), fld('section', 'Section', 'C', 'C'),
+        h('div', {class: 'row'}, h('button', {class: 'pill rose', id: 'doSend', onclick: async e => {
+            const sendBtn = e.currentTarget;   // currentTarget is null once we await below
+            const url = $('#pUrl').value.trim();
+            const rec = {student_id: f.student_id.value.trim(), name: f.name.value.trim(), program: f.program.value.trim(), year: Number(f.year.value), section: f.section.value.trim()};
+            if (!url) return toast("Enter your partner's API URL in the toolbar first.", true);
+            if (!rec.student_id || !rec.name || !rec.program || !rec.section || !(rec.year >= 1)) return toast('Fill in every field of the record.', true);
+            if (!await ask('📮', 'Send this record?', `${rec.name} (${rec.student_id}) will be sent to ${new URL(url).hostname}. Only send to your assigned partner.`, 'Send')) return;
+            out.replaceChildren();
+            await busy(sendBtn, async () => {
+                try {
+                    const r = await fetch('/send-record', {method: 'POST', headers: JH, body: JSON.stringify({url, record: rec})}); const d = await r.json();
+                    if (!r.ok) throw new Error(d.error || `Partner replied ${d.partner_status}: ${replyText(d.partner_response)}`);
+                    out.replaceChildren(receipt(d.sent, d.partner_status, d.partner_response));
+                } catch (err) { toast(err.message, true); }
+            });
+        }}, 'Send to partner')), out);
+    openSheet('Send a record', el);
+}
+$('#bSend').onclick = sendSheet;
+
+/* ---------- explorer (Lab 7 endpoints) ---------- */
+function explorer() {
+    const out = h('div', {}), inputs = h('div', {class: 'form'});
+    const defs = {
+        all: {label: 'GET /students', fields: [], path: () => '/students'},
+        one: {label: 'GET /students/<id>', fields: [['id', 'Database ID', '2']], path: v => '/students/' + (Number(v.id) || 1)},
+        filter: {label: 'GET /students/filter', fields: [['program', 'Program', 'BSED'], ['year', 'Year', ''], ['section', 'Section', '']],
+                 path: v => '/students/filter?' + new URLSearchParams(Object.entries(v).filter(([, x]) => x)).toString()},
+        api: {label: 'GET /api/students', fields: [], path: () => '/api/students'}
+    };
+    let cur = 'all', vals = {};
+    const eps = h('div', {class: 'eps'});
+    const draw = () => {
+        eps.replaceChildren(...Object.entries(defs).map(([k, d]) => h('button', {class: 'pill ghost sm' + (k === cur ? ' on' : ''), onclick: () => { cur = k; draw(); }}, d.label)));
+        vals = {}; inputs.replaceChildren(...defs[cur].fields.map(([k, label, v]) => { const i = h('input', {type: 'text', value: v}); vals[k] = i; return h('label', {}, h('span', {}, label), i); }),
+            h('div', {class: 'row'}, h('button', {class: 'pill rose', onclick: run}, 'Run')));
+    };
+    const run = async () => {
+        const v = Object.fromEntries(Object.entries(vals).map(([k, i]) => [k, i.value.trim()])), path = defs[cur].path(v), t0 = performance.now();
+        out.replaceChildren(h('div', {class: 'soft'}, 'Calling ' + path + ' …'));
+        try {
+            const r = await fetch(path), text = await r.text(); let body = text; try { body = JSON.stringify(JSON.parse(text), null, 2); } catch (e) { /* raw */ }
+            out.replaceChildren(h('div', {}, h('span', {class: 'stat ' + (r.ok ? 'ok' : 'bad')}, `${r.status} ${r.statusText || ''}`), h('span', {class: 'soft mono', style: 'margin-left:10px'}, `${path} · ${Math.round(performance.now() - t0)} ms`)), h('pre', {class: 'code mono'}, body));
+        } catch (e) { out.replaceChildren(h('span', {class: 'stat bad'}, 'Network error'), h('pre', {class: 'code'}, e.message)); }
+    };
+    draw(); openSheet('API explorer', h('p', {class: 'soft', style: 'margin-top:0'}, 'Try the Lab 7 endpoints against students.db.'), eps, inputs, out);
+}
+$('#bTools').onclick = explorer;
+
+/* ---------- share my API ---------- */
+$('#bShare').onclick = async () => {
+    const url = location.origin + '/api/students';
+    try {
+        if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) await navigator.share({title: 'My Student API', url});
+        else await navigator.clipboard.writeText(url);
+        toast('Your API URL: ' + url);
+    } catch (e) { if (e.name === 'AbortError') return; window.prompt('Copy your API URL:', url); }
+};
+$('#bNew').onclick = () => form(null);
+
+/* ---------- boot + auto-refresh ---------- */
+load();
+setInterval(() => { if (!document.hidden && !sheetOpen() && !$('.dim')) load(true); }, 10000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !sheetOpen()) load(true); });
+</script>
+</body>
+</html>
