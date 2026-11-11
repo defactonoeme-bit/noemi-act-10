@@ -1,3 +1,4 @@
+import time
 import os
 import sqlite3
 from urllib.parse import urlparse
@@ -387,6 +388,43 @@ def send_record():
 # ==============================
 # RUN APPLICATION
 # ==============================
+
+# ==============================
+# AWS LIGHTSAIL UPDATE: server info and partner health (used by the status panel)
+# ==============================
+
+@app.route('/server-info')
+def server_info():
+    conn = get_db_connection()
+    rows = conn.execute(
+        "SELECT COALESCE(source, 'Local') AS source, COUNT(*) AS n FROM students GROUP BY source"
+    ).fetchall()
+    conn.close()
+
+    return jsonify({
+        "host": request.host,
+        "partner_host": urlparse(PARTNER_URL).netloc,
+        "records": sum(r['n'] for r in rows),
+        "by_source": {r['source']: r['n'] for r in rows}
+    })
+
+
+@app.route('/partner-status')
+def partner_status():
+    started = time.time()
+
+    try:
+        response = requests.get(PARTNER_URL, timeout=8, allow_redirects=False)
+        data = response.json()
+        return jsonify({
+            "online": response.ok and isinstance(data, list),
+            "status": response.status_code,
+            "records": len(data) if isinstance(data, list) else 0,
+            "ms": int((time.time() - started) * 1000)
+        })
+    except (requests.RequestException, ValueError):
+        return jsonify({"online": False, "error": "Partner did not answer in time"})
+
 
 if __name__ == '__main__':
     app.run(

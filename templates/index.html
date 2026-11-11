@@ -702,6 +702,82 @@
             input { font-size: 16px; }
             button { min-height: 44px; }
         }
+    
+        /* ===== AWS LIGHTSAIL UPDATE: full-width console, one column ===== */
+        html { scroll-behavior: smooth; }
+        html.aws-dark { filter: invert(0.92) hue-rotate(180deg); background: #fff; }
+        html.aws-dark body { background: #fff !important; }
+        html.aws-dark img, html.aws-dark video { filter: invert(1) hue-rotate(180deg); }
+
+        body { background: #eef2f7 !important; }
+        .container { max-width: none !important; width: 100%; margin: 0 !important; padding: 0 28px 40px !important; display: block; }
+        .container > .header, .container > h1, .container > .subtitle { display: none !important; }
+        .container > .card, .container > section.card, .container > .aws-status { margin: 0 0 20px !important; width: 100%; max-width: none !important; }
+
+        .aws-top {
+            position: sticky; top: 0; z-index: 60; margin: 0 -28px 0; padding: 14px 28px;
+            display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+            background: linear-gradient(90deg, #0b1f36, #12406b); color: #fff; font-family: Arial, sans-serif;
+        }
+        .aws-brand { font-size: 22px; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+        .aws-brand span { font-size: 13px; opacity: 0.75; }
+        .aws-top-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .aws-host-pill { background: rgba(255,255,255,0.14); padding: 6px 14px; border-radius: 999px; font-size: 13px; font-family: Consolas, monospace; }
+        .aws-ghost-btn { margin: 0; background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.45); border-radius: 8px; padding: 7px 14px; cursor: pointer; font-size: 13px; }
+        .aws-ghost-btn:hover { background: rgba(255,255,255,0.15); }
+
+        .aws-tabs {
+            position: sticky; top: 61px; z-index: 55; margin: 0 -28px 22px; padding: 0 28px;
+            display: flex; gap: 4px; background: #fff; border-bottom: 1px solid #d6e0ec; font-family: Arial, sans-serif;
+            box-shadow: 0 3px 8px rgba(15, 47, 79, 0.06);
+        }
+        .aws-tabs button {
+            margin: 0; background: transparent; color: #475569; border: 0; border-bottom: 3px solid transparent; border-radius: 0;
+            padding: 14px 22px; font-size: 15px; cursor: pointer; box-shadow: none;
+        }
+        .aws-tabs button:hover { color: #0b1f36; background: #f1f6fb; }
+        .aws-tabs button.on { color: #0b4a85; border-bottom-color: #0b4a85; font-weight: 700; }
+
+        .aws-status {
+            padding: 22px; background: #fff; color: #1e293b; border: 1px solid #d6e2ef; border-radius: 12px;
+            border-left: 6px solid #16a34a; font-family: Arial, sans-serif; box-shadow: 0 4px 14px rgba(15, 47, 79, 0.08);
+        }
+        .aws-status h2 { margin: 0; font-size: 20px; color: #0b1f36; }
+        .aws-status-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+        .aws-pill { padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+        .aws-pill-ok { background: #dcfce7; color: #166534; }
+        .aws-pill-bad { background: #fee2e2; color: #991b1b; }
+        .aws-pill-wait { background: #e2e8f0; color: #475569; }
+        .aws-check-btn { margin: 0 0 0 auto; background: #0b4a85; color: #fff; border: 0; border-radius: 8px; padding: 9px 16px; cursor: pointer; font-size: 13px; }
+        .aws-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+        .aws-tile { background: #f1f6fb; border: 1px solid #dbe6f1; border-radius: 10px; padding: 14px; min-width: 0; }
+        .aws-tile small, .aws-sources small { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
+        .aws-tile b { display: block; margin: 5px 0; font-size: 16px; overflow-wrap: anywhere; color: #0b1f36; }
+        .aws-tile span { font-size: 12px; color: #64748b; }
+        .aws-sources { margin-top: 18px; }
+        .aws-bar { display: flex; height: 18px; margin: 8px 0; border-radius: 999px; overflow: hidden; background: #e2e8f0; }
+        .aws-bar div { height: 100%; }
+        .aws-legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; }
+        .aws-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+        .aws-foot { margin: 12px 0 0; font-size: 12px; color: #64748b; }
+
+        .footer, .footer p { color: #64748b !important; text-shadow: none !important; }
+
+        /* records become full-width rows */
+        .student-row { align-items: center !important; }
+        .student-row > div:first-child { display: flex; gap: 40px; align-items: center; flex: 1; flex-wrap: wrap; }
+        .student-item { display: flex !important; align-items: center; flex-wrap: wrap; gap: 10px 28px; }
+        .student-item .record-head { flex: 0 0 280px; display: flex; align-items: center; gap: 12px; justify-content: space-between; margin: 0 !important; }
+        .student-item .record-meta { flex: 1; margin: 0 !important; }
+        .form-grid { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+
+        @media (max-width: 1000px) { .aws-grid { grid-template-columns: repeat(2, 1fr); } .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+        @media (max-width: 560px) {
+            .aws-grid { grid-template-columns: 1fr; } .aws-check-btn { margin-left: 0; }
+            .aws-tabs { overflow-x: auto; } .aws-tabs button { padding: 12px 14px; white-space: nowrap; }
+            .student-item .record-head { flex-basis: 100%; }
+            .form-grid { grid-template-columns: 1fr !important; }
+        }
     </style>
 
 </head>
@@ -732,6 +808,63 @@
             </p>
 
         </div>
+
+    <!-- ===== AWS LIGHTSAIL UPDATE: top bar, tabs and deployment status ===== -->
+    <header class="aws-top">
+        <div class="aws-brand">☁ <b>Student API Console</b><span>Deployed on AWS Lightsail</span></div>
+        <div class="aws-top-right">
+            <span class="aws-host-pill" id="awsHostPill">-</span>
+            <button type="button" id="awsCopy" class="aws-ghost-btn">Copy my API URL</button>
+            <button type="button" id="awsTheme" class="aws-ghost-btn">🌙 Dark</button>
+        </div>
+    </header>
+
+    <nav class="aws-tabs" id="awsTabs" aria-label="Sections">
+        <button type="button" data-tab="overview">Overview</button>
+        <button type="button" data-tab="records">My Records</button>
+        <button type="button" data-tab="partner">Partner &amp; Send</button>
+        <button type="button" data-tab="labs">Earlier Labs</button>
+    </nav>
+
+    <section class="aws-status" id="awsStatus" aria-live="polite">
+        <div class="aws-status-head">
+            <h2>Deployment Status</h2>
+            <span id="awsLive" class="aws-pill aws-pill-wait">Checking...</span>
+            <button type="button" id="awsCheck" class="aws-check-btn">Check now</button>
+        </div>
+
+        <div class="aws-grid">
+            <div class="aws-tile">
+                <small>This server</small>
+                <b id="awsHost">-</b>
+                <span>Public address of this app</span>
+            </div>
+            <div class="aws-tile">
+                <small>Web stack</small>
+                <b>Nginx → Gunicorn → Flask</b>
+                <span>SQLite database on the server disk</span>
+            </div>
+            <div class="aws-tile">
+                <small>Partner server</small>
+                <b id="awsPartner">-</b>
+                <span id="awsPartnerMs">Not checked yet</span>
+            </div>
+            <div class="aws-tile">
+                <small>Partner records online</small>
+                <b id="awsPartnerCount">-</b>
+                <span id="awsPartnerState">-</span>
+            </div>
+        </div>
+
+        <div class="aws-sources">
+            <small>My records by source</small>
+            <div class="aws-bar" id="awsBar"></div>
+            <div class="aws-legend" id="awsLegend"></div>
+        </div>
+
+        <p class="aws-foot" id="awsFoot">Status refreshes every 15 seconds.</p>
+    </section>
+    <!-- ===== END AWS LIGHTSAIL UPDATE ===== -->
 
 
         <!-- ==========================================
@@ -2080,6 +2213,110 @@
 
         }, 10000);
 
+    
+    // ===== AWS LIGHTSAIL UPDATE: tabs, theme, server info and partner health =====
+    (function () {
+        const $ = id => document.getElementById(id);
+        const COLORS = {'Local': '#2563eb', 'Classmate API': '#16a34a', 'Partner API': '#ea580c', 'External API': '#ea580c'};
+        const GROUPS = {"overview": ["awsStatus", "dashboardCard"], "records": ["formCard", "myRecordsCard"], "partner": ["partnerCard", "sendCard"]};
+        const holder = document.querySelector('.container');
+
+        function setTheme(dark) {
+            document.documentElement.classList.toggle('aws-dark', dark);
+            $('awsTheme').textContent = dark ? '☀ Light' : '🌙 Dark';
+            try { localStorage.setItem('awsTheme', dark ? 'dark' : 'light'); } catch (e) { /* storage may be blocked */ }
+        }
+
+        let startDark = false;
+        try { startDark = localStorage.getItem('awsTheme') === 'dark'; } catch (e) { /* storage may be blocked */ }
+        setTheme(startDark);
+        $('awsTheme').addEventListener('click', () => setTheme(!document.documentElement.classList.contains('aws-dark')));
+
+        // one tab at a time: every section is full width, one column
+        function groupOf(el) {
+            for (const [name, ids] of Object.entries(GROUPS)) {
+                if (ids.includes(el.id)) return name;
+            }
+            return 'labs';
+        }
+
+        function showTab(name) {
+            Array.from(holder.children).forEach(el => {
+                if (!(el.classList.contains('card') || el.id === 'awsStatus')) return;
+                el.style.display = groupOf(el) === name ? '' : 'none';
+            });
+            document.querySelectorAll('#awsTabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
+            try { history.replaceState(null, '', '#' + name); } catch (e) { /* ignore */ }
+            window.scrollTo(0, 0);
+        }
+
+        document.querySelectorAll('#awsTabs button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+        const wanted = (location.hash || '').slice(1);
+        showTab(['overview', 'records', 'partner', 'labs'].includes(wanted) ? wanted : 'overview');
+
+        $('awsCopy').addEventListener('click', async () => {
+            const url = location.origin + '/api/students';
+            try { await navigator.clipboard.writeText(url); $('awsCopy').textContent = 'Copied!'; }
+            catch (e) { $('awsCopy').textContent = url; }
+            setTimeout(() => { $('awsCopy').textContent = 'Copy my API URL'; }, 2500);
+        });
+
+        function pill(ok, text) {
+            const p = $('awsLive');
+            p.textContent = text;
+            p.className = 'aws-pill ' + (ok === null ? 'aws-pill-wait' : ok ? 'aws-pill-ok' : 'aws-pill-bad');
+        }
+
+        function drawSources(counts) {
+            const bar = $('awsBar'), legend = $('awsLegend');
+            bar.textContent = ''; legend.textContent = '';
+            const total = Object.values(counts).reduce((a, b) => a + b, 0);
+            if (!total) { legend.textContent = 'No records yet.'; return; }
+            Object.entries(counts).forEach(([name, n]) => {
+                const seg = document.createElement('div');
+                seg.style.width = (n * 100 / total) + '%';
+                seg.style.background = COLORS[name] || '#64748b';
+                seg.title = name + ': ' + n;
+                bar.appendChild(seg);
+                const item = document.createElement('span');
+                const dot = document.createElement('i');
+                dot.style.background = COLORS[name] || '#64748b';
+                item.appendChild(dot);
+                item.appendChild(document.createTextNode(name + ': ' + n));
+                legend.appendChild(item);
+            });
+        }
+
+        async function refresh() {
+            pill(null, 'Checking...');
+            try {
+                const info = await (await fetch('/server-info')).json();
+                $('awsHost').textContent = info.host;
+                $('awsHostPill').textContent = info.host;
+                $('awsPartner').textContent = info.partner_host;
+                drawSources(info.by_source);
+            } catch (e) {
+                pill(false, 'Server info unavailable');
+                return;
+            }
+
+            try {
+                const st = await (await fetch('/partner-status')).json();
+                $('awsPartnerMs').textContent = st.online ? 'Replied in ' + st.ms + ' ms (HTTP ' + st.status + ')' : (st.error || 'No reply');
+                $('awsPartnerCount').textContent = st.online ? st.records : '-';
+                $('awsPartnerState').textContent = st.online ? 'Partner API is reachable' : 'Partner API is not reachable';
+                pill(st.online, st.online ? 'Partner online' : 'Partner offline');
+            } catch (e) {
+                pill(false, 'Partner check failed');
+            }
+
+            $('awsFoot').textContent = 'Last checked ' + new Date().toLocaleTimeString() + '. Status refreshes every 15 seconds.';
+        }
+
+        $('awsCheck').addEventListener('click', refresh);
+        setInterval(refresh, 15000);
+        refresh();
+    })();
     </script>
 
 
