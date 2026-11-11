@@ -1,403 +1,2088 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>noemi · board</title>
-<style>
-:root {
-    --paper: #fff8ef; --card: #ffffff; --ink: #3a2a22; --soft: #8a7466; --line: #efdcc8;
-    --rose: #e11d48; --orange: #f97316; --sky: #0ea5e9; --leaf: #16a34a; --gold: #d97706;
-    --sky-bg: #eaf6fd; --leaf-bg: #eaf8ee; --gold-bg: #fdf3e0;
-}
-* { box-sizing: border-box; }
-html, body { margin: 0; }
-body { background: var(--paper); color: var(--ink); font: 15px/1.5 "Trebuchet MS", "Segoe UI", sans-serif; }
-body.lock { overflow: hidden; }
-h1, h2, h3, .serif { font-family: Georgia, "Times New Roman", serif; }
-button { font: inherit; cursor: pointer; }
-input { font: inherit; }
-.mono { font-family: Consolas, "Courier New", monospace; }
-.soft { color: var(--soft); }
 
-/* ---------- top toolbar ---------- */
-.bar { position: sticky; top: 0; z-index: 20; background: rgba(255,248,239,0.94); backdrop-filter: blur(6px);
-       border-bottom: 2px solid var(--line); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 12px 20px; }
-.logo { font-family: Georgia, serif; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
-.logo span { color: var(--rose); font-style: italic; }
-.logo::before { content: ""; display: inline-block; width: 14px; height: 14px; margin-right: 8px; border-radius: 50%;
-                background: linear-gradient(135deg, var(--rose), var(--orange)); }
-.urlbox { display: flex; flex: 1 1 360px; min-width: 260px; background: #fff; border: 2px solid var(--line); border-radius: 999px; padding: 4px; }
-.urlbox:focus-within { border-color: var(--orange); }
-.urlbox input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; padding: 6px 14px; }
-.pill { border: 0; border-radius: 999px; padding: 8px 16px; background: var(--ink); color: #fff; font-weight: 700; }
-.pill:hover { filter: brightness(1.2); }
-.pill.rose { background: linear-gradient(135deg, var(--rose), var(--orange)); }
-.pill.ghost { background: #fff; color: var(--ink); border: 2px solid var(--line); }
-.pill.ghost:hover { border-color: var(--orange); filter: none; }
-.pill.sm { padding: 5px 12px; font-size: 13px; }
-.pill:disabled { opacity: 0.5; cursor: wait; }
-.acts { display: flex; gap: 8px; flex-wrap: wrap; }
-.search { flex: 0 1 200px; min-width: 140px; border: 2px solid var(--line); border-radius: 999px; padding: 7px 14px; background: #fff; outline: 0; }
-.search:focus { border-color: var(--orange); }
-.hint { width: 100%; margin: 0; font-size: 13px; color: var(--soft); }
+    <meta charset="UTF-8">
 
-/* ---------- kanban board ---------- */
-.board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding: 20px; align-items: start; }
-.col { border-radius: 18px; padding: 0 12px 14px; background: var(--tint); border: 2px solid var(--edge); }
-.col header { display: flex; align-items: center; gap: 10px; padding: 16px 6px 12px; }
-.col header h2 { margin: 0; font-size: 20px; flex: 1; }
-.col header .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--edge); }
-.count { background: var(--edge); color: #fff; border-radius: 999px; padding: 1px 11px; font-weight: 700; font-size: 14px; }
-.cards { display: flex; flex-direction: column; gap: 12px; }
-.card { background: var(--card); border-radius: 14px; padding: 13px 14px 11px 18px; position: relative; box-shadow: 0 2px 0 rgba(58,42,34,0.07), 0 8px 18px -12px rgba(58,42,34,0.35); }
-.card::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 5px; border-radius: 0 6px 6px 0; background: var(--edge); }
-.card h3 { margin: 0; font-size: 17px; overflow-wrap: anywhere; }
-.card .meta { color: var(--soft); font-size: 13px; }
-.card .foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 9px; flex-wrap: wrap; }
-.card.flash { animation: flash 2.4s ease-out; }
-@keyframes flash { 0% { background: #fff1c2; transform: scale(1.02); } 100% { background: #fff; transform: none; } }
-.tag { display: inline-block; padding: 1px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; background: var(--tint); color: var(--edge); border: 1px solid var(--edge); }
-.round { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--line); background: #fff; color: var(--ink); display: inline-grid; place-items: center; padding: 0; }
-.round:hover { border-color: var(--orange); }
-.round.del:hover { border-color: var(--rose); color: var(--rose); }
-.tools { display: flex; gap: 6px; }
-.empty { text-align: center; color: var(--soft); border: 2px dashed var(--edge); border-radius: 14px; padding: 22px 12px; background: rgba(255,255,255,0.5); }
-.local { --edge: var(--sky); --tint: var(--sky-bg); }
-.imported { --edge: var(--leaf); --tint: var(--leaf-bg); }
-.partner { --edge: var(--gold); --tint: var(--gold-bg); }
-.colnote { font-size: 12px; color: var(--soft); padding: 0 6px 10px; margin: -6px 0 0; }
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-/* ---------- side sheet ---------- */
-.veil { position: fixed; inset: 0; background: rgba(58,42,34,0.45); z-index: 40; }
-.sheet { position: fixed; z-index: 41; top: 0; right: 0; bottom: 0; width: min(430px, 100%); background: var(--paper); border-left: 3px solid var(--ink);
-         display: flex; flex-direction: column; box-shadow: -18px 0 40px rgba(58,42,34,0.3); }
-.sheet[hidden], .veil[hidden] { display: none; }
-.sheet header { display: flex; align-items: center; gap: 10px; padding: 16px 18px; border-bottom: 2px solid var(--line); }
-.sheet header h2 { margin: 0; flex: 1; font-size: 22px; }
-.sbody { padding: 18px; overflow: auto; }
-.form { display: grid; gap: 12px; }
-.form label span { display: block; font-size: 12px; font-weight: 700; color: var(--soft); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
-.form input[type=text], .form input[type=number], .form input[type=url] { width: 100%; border: 2px solid var(--line); border-radius: 12px; padding: 9px 12px; background: #fff; outline: 0; }
-.form input:focus { border-color: var(--orange); }
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.row { display: flex; gap: 10px; flex-wrap: wrap; }
+    <title>Student API Interface</title>
 
-/* id-card style details */
-.idcard { background: #fff; border: 2px solid var(--ink); border-radius: 16px; overflow: hidden; }
-.idcard .band { background: linear-gradient(135deg, var(--edge), var(--ink)); color: #fff; padding: 18px; display: flex; align-items: center; gap: 14px; }
-.idcard .face { width: 60px; height: 60px; border-radius: 50%; background: #fff; color: var(--edge); font: 700 22px Georgia, serif; display: grid; place-items: center; flex: none; }
-.idcard h3 { margin: 0; font-size: 21px; }
-.idcard dl { margin: 0; padding: 6px 18px 14px; display: grid; grid-template-columns: auto 1fr; gap: 0 18px; }
-.idcard dt { color: var(--soft); padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; }
-.idcard dd { margin: 0; padding: 8px 0; border-bottom: 1px dashed var(--line); font-weight: 700; overflow-wrap: anywhere; }
 
-/* send receipt */
-.receipt { margin-top: 16px; background: #fff; border: 2px dashed var(--leaf); border-radius: 14px; padding: 16px; position: relative; }
-.receipt .stamp { position: absolute; top: 12px; right: 14px; transform: rotate(8deg); border: 3px solid var(--leaf); color: var(--leaf); border-radius: 8px; padding: 0 8px; font: 700 15px Georgia, serif; letter-spacing: 0.1em; }
-.receipt h4 { margin: 0 0 2px; font: 700 18px Georgia, serif; }
-.receipt table { border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 14px; }
-.receipt td { padding: 5px 0; border-bottom: 1px dotted var(--line); }
-.receipt td:first-child { color: var(--soft); width: 38%; }
+    <style>
 
-/* explorer */
-.eps { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-.eps button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
-.code { background: #2a1d17; color: #ffe9cf; border-radius: 12px; padding: 14px; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 380px; overflow: auto; margin-top: 12px; }
-.stat { display: inline-block; font-weight: 700; padding: 2px 10px; border-radius: 6px; }
-.stat.ok { background: var(--leaf-bg); color: var(--leaf); }
-.stat.bad { background: #fde8ec; color: var(--rose); }
+        /* ==========================================
+           GENERAL
+           ========================================== */
 
-/* confirm modal + toasts */
-.dim { position: fixed; inset: 0; z-index: 60; background: rgba(58,42,34,0.55); display: grid; place-items: center; padding: 16px; }
-.dialog { background: var(--paper); border: 3px solid var(--ink); border-radius: 22px; padding: 24px; width: min(400px, 100%); text-align: center; box-shadow: 8px 8px 0 var(--ink); }
-.dialog .icon { font-size: 34px; }
-.dialog h3 { margin: 4px 0 6px; font-size: 22px; }
-.dialog p { margin: 0 0 18px; color: var(--soft); }
-.dialog .row { justify-content: center; }
-#toasts { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 70; width: min(520px, calc(100% - 24px)); pointer-events: none; }
-.toast { background: var(--ink); color: #fff; border-radius: 999px; padding: 10px 20px; text-align: center; box-shadow: 0 10px 24px rgba(58,42,34,0.35); animation: drop 0.25s; overflow-wrap: anywhere; }
-.toast.bad { background: var(--rose); }
-@keyframes drop { from { transform: translateY(-12px); opacity: 0; } }
+        * {
+            box-sizing: border-box;
+        }
 
-/* ---------- phones: columns become a swipeable strip, sheet becomes a bottom sheet ---------- */
-@media (max-width: 900px) {
-    .bar { padding: 10px 12px; gap: 10px; }
-    .board { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; padding: 14px 12px 28px; -webkit-overflow-scrolling: touch; }
-    .col { flex: 0 0 86%; scroll-snap-align: center; }
-    .search { flex: 1 1 100%; }
-    .sheet { top: auto; left: 0; width: 100%; max-height: 92vh; border-left: 0; border-top: 3px solid var(--ink); border-radius: 22px 22px 0 0; }
-    .two { grid-template-columns: 1fr; }
-    #toasts { top: 12px; }
-}
-@media (pointer: coarse) {
-    input { font-size: 16px; }
-    .pill { min-height: 44px; }
-    .pill.sm { min-height: 40px; }
-    .round { width: 44px; height: 44px; }
-}
-</style>
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+
+            margin: 0;
+            padding: 0;
+
+            min-height: 100vh;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0f4c81,
+                    #1976d2,
+                    #64b5f6
+                );
+
+            color: #333;
+        }
+
+
+        .container {
+            max-width: 900px;
+
+            margin: 40px auto;
+
+            padding: 20px;
+        }
+
+
+        /* ==========================================
+           HEADER
+           ========================================== */
+
+        .header {
+            background: rgba(255, 255, 255, 0.97);
+
+            padding: 35px 25px;
+
+            border-radius: 20px;
+
+            text-align: center;
+
+            box-shadow:
+                0 10px 30px
+                rgba(0, 0, 0, 0.15);
+
+            margin-bottom: 25px;
+        }
+
+
+        .header-icon {
+            font-size: 50px;
+
+            margin-bottom: 10px;
+        }
+
+
+        .header h1 {
+            margin: 0;
+
+            color: #0f4c81;
+
+            font-size: 34px;
+        }
+
+
+        .header p {
+            margin: 10px 0 0;
+
+            color: #666;
+
+            font-size: 15px;
+        }
+
+
+        /* ==========================================
+           CARDS
+           ========================================== */
+
+        .card {
+            background: rgba(255, 255, 255, 0.97);
+
+            padding: 30px;
+
+            border-radius: 18px;
+
+            margin-bottom: 25px;
+
+            box-shadow:
+                0 10px 30px
+                rgba(0, 0, 0, 0.12);
+        }
+
+
+        .card h2 {
+            margin-top: 0;
+
+            color: #0f4c81;
+
+            font-size: 24px;
+        }
+
+
+        .card-description {
+            color: #777;
+
+            margin-bottom: 20px;
+
+            line-height: 1.6;
+        }
+
+
+        /* ==========================================
+           BUTTONS
+           ========================================== */
+
+        button {
+            padding: 12px 20px;
+
+            margin-top: 10px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0f4c81,
+                    #1976d2
+                );
+
+            color: white;
+
+            font-size: 15px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition: all 0.3s ease;
+
+            box-shadow:
+                0 4px 10px
+                rgba(15, 76, 129, 0.25);
+        }
+
+
+        button:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 7px 15px
+                rgba(15, 76, 129, 0.35);
+        }
+
+
+        button:active {
+            transform: translateY(0);
+        }
+
+
+        /* ==========================================
+           STUDENT RESULT
+           ========================================== */
+
+        #result {
+            margin-top: 20px;
+
+            padding: 20px;
+
+            background: #f7fbff;
+
+            border-left:
+                5px solid #1976d2;
+
+            border-radius: 10px;
+
+            min-height: 50px;
+        }
+
+
+        #result p {
+            margin: 10px 0;
+
+            padding: 12px;
+
+            background: white;
+
+            border-radius: 7px;
+
+            border: 1px solid #e5e5e5;
+        }
+
+
+        #result b {
+            color: #0f4c81;
+        }
+
+
+        /* ==========================================
+           GREETING
+           ========================================== */
+
+        .input-group {
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+            align-items: center;
+        }
+
+
+        input {
+            flex: 1;
+
+            min-width: 220px;
+
+            padding: 12px 15px;
+
+            border:
+                1px solid #ccc;
+
+            border-radius: 10px;
+
+            font-size: 15px;
+
+            outline: none;
+
+            transition: 0.3s;
+        }
+
+
+        input:focus {
+            border-color: #1976d2;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(25, 118, 210, 0.12);
+        }
+
+
+        #greeting {
+            margin-top: 20px;
+
+            padding: 15px 20px;
+
+            background: #e8f5e9;
+
+            border-left:
+                5px solid #43a047;
+
+            border-radius: 10px;
+
+            font-size: 18px;
+
+            font-weight: 600;
+
+            color: #2e7d32;
+
+            min-height: 25px;
+        }
+
+
+        /* ==========================================
+           COURSE API
+           ========================================== */
+
+        #courseResult {
+            margin-top: 20px;
+
+            padding: 20px;
+
+            background: #fffaf0;
+
+            border-left:
+                5px solid #f59e0b;
+
+            border-radius: 10px;
+
+            min-height: 50px;
+        }
+
+
+        #courseResult p {
+            margin: 10px 0;
+
+            padding: 12px;
+
+            background: white;
+
+            border-radius: 7px;
+
+            border: 1px solid #e5e5e5;
+        }
+
+
+        #courseResult b {
+            color: #b45309;
+        }
+
+
+        /* ==========================================
+           DATABASE STUDENTS
+           ========================================== */
+
+        #databaseStudents {
+            margin-top: 25px;
+        }
+
+
+        #studentList {
+            margin-top: 20px;
+
+            padding: 20px;
+
+            background: #f7fbff;
+
+            border-left:
+                5px solid #1976d2;
+
+            border-radius: 10px;
+
+            min-height: 50px;
+        }
+
+
+        .student-item {
+            margin: 10px 0;
+
+            padding: 15px;
+
+            background: white;
+
+            border-radius: 8px;
+
+            border: 1px solid #e5e5e5;
+
+            box-shadow:
+                0 2px 5px
+                rgba(0, 0, 0, 0.05);
+        }
+
+
+        .student-item p {
+            margin: 8px 0;
+        }
+
+
+        .student-item b {
+            color: #0f4c81;
+        }
+
+
+        .database-error {
+            color: #c62828;
+
+            font-weight: 600;
+        }
+
+
+        /* ==========================================
+           DIVIDER
+           ========================================== */
+
+        hr {
+            border: none;
+
+            border-top:
+                1px solid #ddd;
+
+            margin: 30px 0;
+        }
+
+
+        /* ==========================================
+           LOADING
+           ========================================== */
+
+        .loading {
+            color: #1976d2;
+
+            font-style: italic;
+
+            font-weight: 500;
+        }
+
+
+        /* ==========================================
+           ERROR
+           ========================================== */
+
+        .error {
+            color: #c62828;
+
+            font-weight: 600;
+        }
+
+
+        /* ==========================================
+           FOOTER
+           ========================================== */
+
+        .footer {
+            text-align: center;
+
+            color: white;
+
+            font-size: 13px;
+
+            margin-top: 20px;
+
+            padding-bottom: 20px;
+
+            opacity: 0.9;
+        }
+
+
+        /* ==========================================
+           MOBILE RESPONSIVE
+           ========================================== */
+
+        @media (max-width: 600px) {
+
+            .container {
+                margin: 20px auto;
+
+                padding: 12px;
+            }
+
+
+            .header {
+                padding: 25px 18px;
+            }
+
+
+            .header h1 {
+                font-size: 26px;
+            }
+
+
+            .header-icon {
+                font-size: 40px;
+            }
+
+
+            .card {
+                padding: 20px;
+            }
+
+
+            .card h2 {
+                font-size: 21px;
+            }
+
+
+            .input-group {
+                flex-direction: column;
+
+                align-items: stretch;
+            }
+
+
+            input {
+                width: 100%;
+
+                min-width: 100%;
+            }
+
+
+            button {
+                width: 100%;
+            }
+
+        }
+
+
+
+        /* ==========================================
+           LABORATORY ACTIVITIES 8 AND 9
+           ========================================== */
+
+        code {
+            background: #eef4fb;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            background: #eeeeee;
+            color: #666;
+        }
+
+        .badge.local { background: #e3f2fd; color: #0f4c81; }
+        .badge.classmate { background: #e8f5e9; color: #2e7d32; }
+        .badge.external { background: #fff3e0; color: #e65100; }
+
+        button.secondary {
+            background: linear-gradient(135deg, #546e7a, #78909c);
+            box-shadow: 0 4px 10px rgba(84, 110, 122, 0.25);
+        }
+
+        button.danger {
+            background: linear-gradient(135deg, #b71c1c, #e53935);
+            box-shadow: 0 4px 10px rgba(183, 28, 28, 0.25);
+        }
+
+        button.small {
+            padding: 8px 14px;
+            font-size: 13px;
+            margin: 6px 6px 0 0;
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: wait;
+            transform: none;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 6px;
+        }
+
+        .form-grid label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-grid input {
+            width: 100%;
+            min-width: 0;
+            margin-top: 6px;
+        }
+
+        .message {
+            margin-top: 14px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+
+        .message:empty { display: none; }
+        .message.ok { background: #e8f5e9; color: #2e7d32; }
+        .message.bad { background: #ffebee; color: #c62828; }
+        .message.info { background: #e3f2fd; color: #0f4c81; }
+
+        .records {
+            margin-top: 18px;
+            padding: 20px;
+            background: #f7fbff;
+            border-left: 5px solid #1976d2;
+            border-radius: 10px;
+            min-height: 50px;
+        }
+
+        .record-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .record-head strong {
+            font-size: 17px;
+            color: #0f4c81;
+            overflow-wrap: anywhere;
+        }
+
+        .record-meta {
+            color: #666;
+            margin: 6px 0 4px;
+            overflow-wrap: anywhere;
+        }
+
+        .details-box {
+            margin-top: 16px;
+            padding: 18px;
+            background: white;
+            border: 2px solid #1976d2;
+            border-radius: 12px;
+        }
+
+        .details-box:empty { display: none; }
+
+        .details-box h3 { margin: 0; color: #0f4c81; }
+
+        .details-box dl {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 6px 18px;
+            margin: 12px 0 0;
+        }
+
+        .details-box dt { color: #777; font-weight: 600; }
+        .details-box dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin: 6px 0 18px;
+        }
+
+        .stat {
+            background: #f7fbff;
+            border-left: 5px solid #1976d2;
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .stat small { display: block; color: #777; font-weight: 600; }
+        .stat b { font-size: 34px; color: #0f4c81; }
+        .stat.green { border-left-color: #43a047; }
+        .stat.amber { border-left-color: #fb8c00; }
+
+        .receipt {
+            margin-top: 16px;
+            padding: 18px;
+            border: 2px dashed #43a047;
+            border-radius: 12px;
+            background: #f1f8f2;
+        }
+
+        .receipt h3 { margin: 0 0 4px; color: #2e7d32; }
+
+        .receipt table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
+
+        .receipt td { padding: 6px 0; border-bottom: 1px dotted #b7d7bb; overflow-wrap: anywhere; }
+        .receipt td:first-child { color: #666; width: 38%; }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: rgba(10, 30, 60, 0.55);
+        }
+
+        .modal-box {
+            width: 100%;
+            max-width: 420px;
+            padding: 26px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        }
+
+        .modal-box h3 { margin: 0 0 8px; color: #0f4c81; font-size: 20px; }
+        .modal-box p { margin: 0 0 18px; color: #666; line-height: 1.5; }
+        .modal-box .modal-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+        .modal-box button { margin-top: 0; }
+
+        @media (pointer: coarse) {
+            input { font-size: 16px; }
+            button { min-height: 44px; }
+        }
+    </style>
+
 </head>
+
+
 <body>
-<header class="bar">
-    <div class="logo">noemi<span>board</span></div>
-    <div class="urlbox">
-        <input type="url" id="pUrl" placeholder="http://203.0.113.10/api/students" aria-label="Partner API URL">
-        <button class="pill rose" id="bRetrieve">Retrieve</button>
+
+
+    <div class="container">
+
+
+        <!-- ==========================================
+             HEADER
+             ========================================== -->
+
+        <div class="header">
+
+            <div class="header-icon">
+                🎓
+            </div>
+
+            <h1>
+                Student API Interface
+            </h1>
+
+            <p>
+                Flask API Web Application
+            </p>
+
+        </div>
+
+
+        <!-- ==========================================
+             STUDENT INFORMATION
+             ========================================== -->
+
+        <div class="card">
+
+            <h2>
+                📚 Student Information
+            </h2>
+
+            <p class="card-description">
+
+                Click the button below to retrieve
+                student information from the Flask API.
+
+            </p>
+
+
+            <button onclick="loadStudent()">
+
+                🔍 Load Student Information
+
+            </button>
+
+
+            <div id="result">
+
+                Student information will appear here.
+
+            </div>
+
+        </div>
+
+
+        <!-- ==========================================
+             GREETING API
+             ========================================== -->
+
+        <div class="card">
+
+            <h2>
+                👋 Greeting API
+            </h2>
+
+
+            <p class="card-description">
+
+                Enter your first name and let the API
+                generate a personalized greeting.
+
+            </p>
+
+
+            <div class="input-group">
+
+                <input
+                    type="text"
+                    id="nameInput"
+                    placeholder="Enter your first name"
+                >
+
+
+                <button onclick="sayHello()">
+
+                    💬 Say Hello
+
+                </button>
+
+            </div>
+
+
+            <p id="greeting"></p>
+
+        </div>
+
+
+        <!-- ==========================================
+             CUSTOM COURSE API
+             ========================================== -->
+
+        <div class="card">
+
+            <h2>
+                📖 Course Information
+            </h2>
+
+
+            <p class="card-description">
+
+                This section uses my custom
+                <strong>/course</strong> API endpoint
+                created for Laboratory Activity 4.
+
+            </p>
+
+
+            <button onclick="loadCourse()">
+
+                📚 Load Course Information
+
+            </button>
+
+
+            <div id="courseResult">
+
+                Course information will appear here.
+
+            </div>
+
+        </div>
+
+
+        <!-- ==========================================
+             STUDENTS FROM SQLITE DATABASE
+             ========================================== -->
+
+        <div class="card" id="databaseStudents">
+
+            <h2>
+                🗄️ Students from Database
+            </h2>
+
+
+            <p class="card-description">
+
+                These student records are retrieved
+                directly from the SQLite database
+                through the Flask API.
+
+            </p>
+
+
+            <button onclick="loadStudents()">
+
+                📋 Load Students from Database
+
+            </button>
+
+
+            <div id="studentList">
+
+                Student records will appear here.
+
+            </div>
+
+        </div>
+
+
+                <!-- ==========================================
+             ADDITIONAL DATABASE ENDPOINT (LAB 7)
+             ========================================== -->
+
+        <div class="card" id="programCard">
+
+            <h2>
+                🔎 Students by Program
+            </h2>
+
+            <p class="card-description">
+                The extra database endpoint
+                <code>/students/program/&lt;program&gt;</code>
+                returns only the matching rows from students.db.
+            </p>
+
+            <div class="input-group">
+                <input type="text" id="programInput"
+                       value="BSCS" placeholder="Enter a program (e.g. BSIT)">
+                <button onclick="loadProgram()">🔎 Search Program</button>
+            </div>
+
+            <div id="programResults" class="records">
+                Matching students will appear here.
+            </div>
+
+        </div>
+
+
+        <!-- ==========================================
+             CREATE / UPDATE (LAB 8)
+             ========================================== -->
+
+        <div class="card" id="formCard">
+
+            <h2 id="formTitle">
+                ➕ Add a Student
+            </h2>
+
+            <p class="card-description">
+                Create a new record, or choose Edit on a record below to update it.
+            </p>
+
+            <form id="studentForm" onsubmit="saveStudent(event)">
+
+                <div class="form-grid">
+                    <label>Student ID
+                        <input type="text" id="fStudentId" placeholder="e.g. 2026-00106" required>
+                    </label>
+                    <label>Name
+                        <input type="text" id="fName" placeholder="Full name" required>
+                    </label>
+                    <label>Program
+                        <input type="text" id="fProgram" placeholder="e.g. BSIT" required>
+                    </label>
+                    <label>Year
+                        <input type="number" id="fYear" min="1" placeholder="e.g. 3" required>
+                    </label>
+                    <label>Section
+                        <input type="text" id="fSection" placeholder="e.g. A" required>
+                    </label>
+                </div>
+
+                <button type="submit" id="saveButton">➕ Add Student</button>
+                <button type="button" class="secondary" id="cancelButton"
+                        onclick="resetForm()" hidden>✖ Cancel Edit</button>
+
+            </form>
+
+            <div id="formMessage" class="message" aria-live="polite"></div>
+
+        </div>
+
+
+        <!-- ==========================================
+             MY RECORDS (LAB 8)
+             ========================================== -->
+
+        <div class="card" id="myRecordsCard">
+
+            <h2>
+                📒 My Records
+            </h2>
+
+            <p class="card-description">
+                Source: your own SQLite database (students.db).
+                Search, view, edit or delete your records.
+            </p>
+
+            <div class="input-group">
+                <input type="text" id="searchInput"
+                       placeholder="Search by name, student ID or program"
+                       oninput="renderMyRecords()">
+                <button class="secondary" onclick="loadMyRecords()">🔄 Refresh</button>
+            </div>
+
+            <div id="myRecords" class="records">Loading records...</div>
+
+            <div id="myDetails" class="details-box"></div>
+
+        </div>
+
+
+        <!-- ==========================================
+             CLASSMATE'S (PARTNER) RECORDS (LAB 8 AND 9)
+             ========================================== -->
+
+        <div class="card" id="partnerCard">
+
+            <h2>
+                🤝 Classmate's Records
+            </h2>
+
+            <p class="card-description">
+                Source: your partner's deployed API,
+                <strong>{{ partner_host }}</strong>.
+                These records are read from the partner's database.
+                View one, or save it into your own database.
+            </p>
+
+            <button onclick="retrievePartner(this)">📥 Retrieve Classmate's Records</button>
+
+            <div id="partnerMessage" class="message" aria-live="polite"></div>
+
+            <div id="partnerRecords" class="records">
+                Press the button to retrieve the partner's records.
+            </div>
+
+            <div id="remoteDetails" class="details-box"></div>
+
+        </div>
+
+
+        <!-- ==========================================
+             SEND A RECORD (LAB 9)
+             ========================================== -->
+
+        <div class="card" id="sendCard">
+
+            <h2>
+                📤 Send a Practice Record
+            </h2>
+
+            <p class="card-description">
+                Sends one fictional record to your partner's
+                <code>POST /api/students</code> endpoint
+                (<strong>{{ partner_host }}</strong>).
+                Coordinate with your partner before sending.
+            </p>
+
+            <div class="form-grid">
+                <label>Student ID
+                    <input type="text" id="sId" value="EXT-005" placeholder="EXT-005">
+                </label>
+                <label>Name
+                    <input type="text" id="sName" value="Isko Navarro" placeholder="Isko Navarro">
+                </label>
+                <label>Program
+                    <input type="text" id="sProgram" value="BSIT" placeholder="BSIT">
+                </label>
+                <label>Year
+                    <input type="number" id="sYear" min="1" value="1" placeholder="1">
+                </label>
+                <label>Section
+                    <input type="text" id="sSection" value="C" placeholder="C">
+                </label>
+            </div>
+
+            <button onclick="sendRecord(this)">📤 Send Record to Partner</button>
+
+            <div id="sendMessage" class="message" aria-live="polite"></div>
+
+            <div id="sendResult"></div>
+
+        </div>
+
+
+        <!-- ==========================================
+             INTEGRATION DASHBOARD (LAB 9)
+             ========================================== -->
+
+        <div class="card" id="dashboardCard">
+
+            <h2>
+                📊 Integration Dashboard
+            </h2>
+
+            <p class="card-description">
+                Where each record came from. Every record above shows its source label.
+            </p>
+
+            <div class="stats">
+                <div class="stat">
+                    <small>My Local Records</small>
+                    <b id="dLocal">0</b>
+                </div>
+                <div class="stat green">
+                    <small>Imported / Received</small>
+                    <b id="dImported">0</b>
+                </div>
+                <div class="stat amber">
+                    <small>Partner Records Loaded</small>
+                    <b id="dPartner">0</b>
+                </div>
+            </div>
+
+            <p class="card-description" style="margin-bottom: 0">
+                <span class="badge local">Local</span> your own records &nbsp;
+                <span class="badge classmate">Classmate API</span> saved from the partner &nbsp;
+                <span class="badge external">Partner API</span> sent to you by the partner
+            </p>
+
+        </div>
+
+
+
+        <!-- ==========================================
+             FOOTER
+             ========================================== -->
+
+        <div class="footer">
+
+            <p>
+
+                Student API Interface
+                |
+                Flask + JavaScript Fetch API
+                |
+                SQLite Database
+
+            </p>
+
+        </div>
+
+
     </div>
-    <div class="acts">
-        <button class="pill" id="bNew">+ New card</button>
-        <button class="pill ghost" id="bSend">Send a record</button>
-        <button class="pill ghost" id="bTools">Explorer</button>
-        <button class="pill ghost" id="bShare">Share my API</button>
-    </div>
-    <input type="search" class="search" id="q" placeholder="Search my cards" aria-label="Search my cards">
-    <p class="hint" id="hint">Enter your partner's AWS Static IP or domain and press Retrieve. Save a partner card to move it into Imported.</p>
-</header>
 
-<main class="board">
-    <section class="col local" aria-label="My records">
-        <header><span class="dot"></span><h2>My Records</h2><span class="count" id="cLocal">0</span></header>
-        <p class="colnote">Source: your own SQLite database (Local)</p>
-        <div class="cards" id="kLocal"></div>
-    </section>
-    <section class="col imported" aria-label="Imported and received">
-        <header><span class="dot"></span><h2>Imported &amp; Received</h2><span class="count" id="cImported">0</span></header>
-        <p class="colnote">Saved from a classmate, or sent to you by one</p>
-        <div class="cards" id="kImported"></div>
-    </section>
-    <section class="col partner" aria-label="Partner records">
-        <header><span class="dot"></span><h2>Classmate's Records</h2><span class="count" id="cPartner">0</span></header>
-        <p class="colnote" id="partnerNote">Read-only: records from your partner's API</p>
-        <div class="cards" id="kPartner"></div>
-    </section>
-</main>
 
-<div class="veil" id="veil" hidden></div>
-<aside class="sheet" id="sheet" hidden role="dialog" aria-modal="true">
-    <header><h2 id="sTitle"></h2><button class="pill ghost sm" id="sClose">Close</button></header>
-    <div class="sbody" id="sBody"></div>
-</aside>
-<div id="toasts"></div>
+    <!-- ==========================================
+         JAVASCRIPT
+         ========================================== -->
 
-<script>
-const $ = s => document.querySelector(s);
-const $$ = s => [...document.querySelectorAll(s)];
-const JH = {'Content-Type': 'application/json'};
-const state = {records: [], partner: [], flash: null};
+    <script>
 
-/* tiny DOM builder: values are inserted as text, never as HTML */
-function h(tag, attrs, ...kids) {
-    const n = document.createElement(tag);
-    for (const [k, v] of Object.entries(attrs || {})) {
-        if (k === 'class') n.className = v;
-        else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
-        else if (v === true) n.setAttribute(k, '');
-        else if (v !== false && v != null) n.setAttribute(k, v);
-    }
-    kids.flat().forEach(c => { if (c != null && c !== false) n.append(c.nodeType ? c : document.createTextNode(String(c))); });
-    return n;
-}
-const isLocal = r => (r.source || 'Local') === 'Local';
-const initials = n => String(n || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
-function toast(msg, bad) { const t = h('div', {class: 'toast' + (bad ? ' bad' : '')}, msg); $('#toasts').append(t); setTimeout(() => t.remove(), 4000); }
-async function api(url, opts) {
-    const r = await fetch(url, opts); let d = null; try { d = await r.json(); } catch (e) { /* not JSON */ }
-    if (!r.ok) throw new Error((d && (d.error || d.message)) || 'Request failed (' + r.status + ')');
-    return d;
-}
-async function busy(btn, fn) { const l = btn.textContent; btn.disabled = true; btn.textContent = '…'; try { await fn(); } finally { btn.disabled = false; btn.textContent = l; } }
 
-/* ---------- confirm dialog ---------- */
-function ask(icon, title, text, okLabel, danger) {
-    return new Promise(resolve => {
-        const done = v => { document.removeEventListener('keydown', onKey); dim.remove(); resolve(v); };
-        const onKey = e => { if (e.key === 'Escape') done(false); };
-        const no = h('button', {class: 'pill ghost', type: 'button', onclick: () => done(false)}, 'Cancel');
-        const yes = h('button', {class: 'pill ' + (danger ? 'rose' : ''), type: 'button', onclick: () => done(true)}, okLabel || 'OK');
-        const dim = h('div', {class: 'dim', onclick: e => { if (e.target === dim) done(false); }},
-            h('div', {class: 'dialog', role: 'dialog', 'aria-modal': 'true'}, h('div', {class: 'icon'}, icon), h('h3', {}, title), h('p', {}, text), h('div', {class: 'row'}, no, yes)));
-        document.addEventListener('keydown', onKey); document.body.append(dim); no.focus();
-    });
-}
+        /* ==========================================
+           STUDENT API
+           ========================================== */
 
-/* ---------- sheet ---------- */
-const sheetOpen = () => !$('#sheet').hidden;
-function openSheet(title, ...nodes) { $('#sTitle').textContent = title; $('#sBody').replaceChildren(...nodes); $('#sheet').hidden = false; $('#veil').hidden = false; document.body.classList.add('lock'); }
-function closeSheet() { $('#sheet').hidden = true; $('#veil').hidden = true; document.body.classList.remove('lock'); }
-$('#sClose').onclick = closeSheet; $('#veil').onclick = closeSheet;
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && sheetOpen() && !$('.dim')) closeSheet(); });
+        function loadStudent() {
 
-/* ---------- cards ---------- */
-function card(r, kind) {
-    const tools = h('div', {class: 'tools'});
-    const round = (label, glyph, fn, cls) => h('button', {class: 'round ' + (cls || ''), 'aria-label': label, title: label, onclick: fn}, glyph);
-    if (kind === 'partner') {
-        tools.append(round('View details', 'ⓘ', () => details(r, true)));
-        tools.append(h('button', {class: 'pill sm rose', onclick: e => save(r, e.currentTarget)}, 'Save →'));
-    } else {
-        tools.append(round('View details', 'ⓘ', () => details(r, false)), round('Edit', '✎', () => form(r)), round('Delete', '✕', () => remove(r), 'del'));
-    }
-    const fresh = state.flash === r.id && kind === 'imported';
-    return h('article', {class: 'card' + (fresh ? ' flash' : '')},
-        h('h3', {}, r.name), h('div', {class: 'meta mono'}, r.student_id),
-        h('div', {class: 'meta'}, `${r.program} · Year ${r.year} · Sec ${r.section}`),
-        h('div', {class: 'foot'}, h('span', {class: 'tag'}, r.source || 'No source'), tools));
-}
-function fill(sel, rows, kind, emptyText) {
-    $(sel).replaceChildren(...(rows.length ? rows.map(r => card(r, kind)) : [h('div', {class: 'empty'}, emptyText)]));
-}
-function render() {
-    const q = $('#q').value.toLowerCase().trim();
-    const mine = state.records.filter(r => !q || [r.name, r.student_id, r.program, r.source].some(v => String(v).toLowerCase().includes(q)));
-    const local = mine.filter(isLocal), imp = mine.filter(r => !isLocal(r));
-    fill('#kLocal', local, 'local', 'No local cards. Press “+ New card”.');
-    fill('#kImported', imp, 'imported', 'Nothing imported yet. Retrieve, then press “Save →”.');
-    fill('#kPartner', state.partner, 'partner', 'Press Retrieve to load your partner’s records.');
-    $('#cLocal').textContent = state.records.filter(isLocal).length;
-    $('#cImported').textContent = state.records.filter(r => !isLocal(r)).length;
-    $('#cPartner').textContent = state.partner.length;
-}
-$('#q').oninput = render;
-async function load(silent) { try { state.records = await api('/api/students'); render(); } catch (e) { if (!silent) toast(e.message, true); } }
+            const result =
+                document.getElementById('result');
 
-/* ---------- details (ID card) ---------- */
-function details(r, remote) {
-    const row = (k, v) => [h('dt', {}, k), h('dd', {}, v ?? 'N/A')];
-    const edge = remote ? 'var(--gold)' : isLocal(r) ? 'var(--sky)' : 'var(--leaf)';
-    const nodes = [h('div', {class: 'idcard', style: `--edge:${edge}`},
-        h('div', {class: 'band'}, h('div', {class: 'face'}, initials(r.name)), h('div', {}, h('h3', {}, r.name), h('div', {class: 'mono'}, r.student_id))),
-        h('dl', {}, row('Program', r.program), row('Year', r.year), row('Section', r.section), row('Database ID', r.id), row('Source', r.source || 'not provided')))];
-    if (remote) nodes.push(h('div', {class: 'row', style: 'margin-top:16px'}, h('button', {class: 'pill rose', onclick: async e => { await save(r, e.currentTarget); closeSheet(); }}, 'Save to my database →')));
-    openSheet(remote ? "Classmate's record" : 'Record details', ...nodes);
-}
 
-/* ---------- add / edit ---------- */
-function form(rec) {
-    const edit = !!rec, f = Object.assign({student_id: '', name: '', program: '', year: '', section: ''}, rec), i = {};
-    const fld = (k, label, type) => { i[k] = h('input', {type: type || 'text', value: f[k] ?? '', required: true, min: k === 'year' ? 1 : null}); return h('label', {}, h('span', {}, label), i[k]); };
-    const el = h('form', {class: 'form', onsubmit: async e => {
-        e.preventDefault();
-        const body = {student_id: i.student_id.value.trim(), name: i.name.value.trim(), program: i.program.value.trim(), year: Number(i.year.value), section: i.section.value.trim(), source: 'Local'};
-        try { await api(edit ? '/api/students/' + rec.id : '/api/students', {method: edit ? 'PUT' : 'POST', headers: JH, body: JSON.stringify(body)}); toast(edit ? 'Card updated' : 'Card added'); closeSheet(); await load(); }
-        catch (err) { toast(err.message, true); }
-    }}, fld('student_id', 'Student ID'), fld('name', 'Name'), h('div', {class: 'two'}, fld('program', 'Program'), fld('year', 'Year', 'number')), fld('section', 'Section'),
-        h('div', {class: 'row'}, h('button', {class: 'pill rose', type: 'submit'}, edit ? 'Save changes' : 'Add card'), h('button', {class: 'pill ghost', type: 'button', onclick: closeSheet}, 'Cancel')));
-    openSheet(edit ? 'Edit card' : 'New card', el); i.student_id.focus();
-}
-async function remove(r) {
-    if (!await ask('🗑️', 'Delete this card?', `${r.name} (${r.student_id}) will be removed from your database. This cannot be undone.`, 'Delete', true)) return;
-    try { await api('/api/students/' + r.id, {method: 'DELETE'}); toast('Card deleted'); await load(); } catch (e) { toast(e.message, true); }
-}
+            result.innerHTML =
+                '<p class="loading">' +
+                '⏳ Loading student information...' +
+                '</p>';
 
-/* ---------- partner ---------- */
-async function retrieve() {
-    const url = $('#pUrl').value.trim();
-    await busy($('#bRetrieve'), async () => {
-        $('#hint').textContent = 'Retrieving partner records…';
-        try {
-            const data = await api('/partner-records?url=' + encodeURIComponent(url));
-            if (!Array.isArray(data)) throw new Error('Partner API did not return a list.');
-            state.partner = data; render();
-            const host = url ? new URL(url).hostname : 'the server default';
-            $('#partnerNote').textContent = 'Read-only · from ' + host;
-            $('#hint').textContent = `Retrieved ${data.length} record(s) from ${host}.`; toast(`Retrieved ${data.length} classmate record(s)`);
-        } catch (e) { $('#hint').textContent = 'Error: ' + e.message; toast(e.message, true); }
-    });
-}
-$('#bRetrieve').onclick = retrieve;
-async function save(r, btn) {
-    const run = async () => {
-        try {
-            await api('/import-student', {method: 'POST', headers: JH, body: JSON.stringify(r)});
-            await load(); state.flash = Math.max(...state.records.map(x => x.id)); render(); toast(`${r.name} moved to Imported`);
-        } catch (e) { toast(e.message, true); }
-    };
-    if (btn) await busy(btn, run); else await run();
-}
 
-/* ---------- send (sheet) ---------- */
-const HTTP = {200: 'OK', 201: 'Created', 400: 'Bad Request', 404: 'Not Found', 409: 'Conflict', 500: 'Server Error', 502: 'Bad Gateway'};
-function parseReply(raw) { if (typeof raw === 'string') { try { raw = JSON.parse(raw); } catch (e) { return {message: raw}; } } return raw || {}; }
-const replyText = raw => { const r = parseReply(raw); return r.message || r.error || 'No message'; };
-function receipt(sent, status, raw) {
-    const reply = parseReply(raw), id = reply.id ?? (reply.student && reply.student.id), tr = (k, v) => h('tr', {}, h('td', {}, k), h('td', {}, v ?? 'N/A'));
-    return h('div', {class: 'receipt'}, h('div', {class: 'stamp'}, 'SENT'), h('h4', {}, 'Record sent to partner'),
-        h('div', {class: 'soft'}, `Partner replied ${status} ${HTTP[status] || ''}`),
-        h('table', {}, tr('Student ID', sent.student_id), tr('Name', sent.name), tr('Program', sent.program), tr('Year', sent.year), tr('Section', sent.section), tr('Source', 'Partner API')),
-        h('p', {style: 'margin:10px 0 0;color:var(--leaf);font-weight:700'}, replyText(raw) + (id !== undefined ? ` (stored as ID ${id})` : '')));
-}
-function sendSheet() {
-    const f = {}, out = h('div', {});
-    const fld = (k, label, val, ph, type) => { f[k] = h('input', {type: type || 'text', value: val, placeholder: ph}); return h('label', {}, h('span', {}, label), f[k]); };
-    const el = h('div', {class: 'form'},
-        h('p', {class: 'soft', style: 'margin:0'}, 'Fill in a fictional record. It goes to the partner URL in the toolbar.'),
-        fld('student_id', 'Student ID', 'EXT-005', 'EXT-005'), fld('name', 'Name', 'Isko Navarro', 'Isko Navarro'),
-        h('div', {class: 'two'}, fld('program', 'Program', 'BSIT', 'BSIT'), fld('year', 'Year', '1', '1', 'number')), fld('section', 'Section', 'C', 'C'),
-        h('div', {class: 'row'}, h('button', {class: 'pill rose', id: 'doSend', onclick: async e => {
-            const sendBtn = e.currentTarget;   // currentTarget is null once we await below
-            const url = $('#pUrl').value.trim();
-            const rec = {student_id: f.student_id.value.trim(), name: f.name.value.trim(), program: f.program.value.trim(), year: Number(f.year.value), section: f.section.value.trim()};
-            if (!url) return toast("Enter your partner's API URL in the toolbar first.", true);
-            if (!rec.student_id || !rec.name || !rec.program || !rec.section || !(rec.year >= 1)) return toast('Fill in every field of the record.', true);
-            if (!await ask('📮', 'Send this record?', `${rec.name} (${rec.student_id}) will be sent to ${new URL(url).hostname}. Only send to your assigned partner.`, 'Send')) return;
-            out.replaceChildren();
-            await busy(sendBtn, async () => {
-                try {
-                    const r = await fetch('/send-record', {method: 'POST', headers: JH, body: JSON.stringify({url, record: rec})}); const d = await r.json();
-                    if (!r.ok) throw new Error(d.error || `Partner replied ${d.partner_status}: ${replyText(d.partner_response)}`);
-                    out.replaceChildren(receipt(d.sent, d.partner_status, d.partner_response));
-                } catch (err) { toast(err.message, true); }
+            fetch('/student')
+
+
+                .then(response => {
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            'Failed to retrieve student data.'
+                        );
+
+                    }
+
+                    return response.json();
+
+                })
+
+
+                .then(data => {
+
+                    result.innerHTML =
+
+                        '<p>' +
+                        '<b>🆔 Student ID:</b> ' +
+                        data.student_id +
+                        '</p>' +
+
+                        '<p>' +
+                        '<b>👤 Name:</b> ' +
+                        data.name +
+                        '</p>' +
+
+                        '<p>' +
+                        '<b>💻 Program:</b> ' +
+                        data.program +
+                        '</p>' +
+
+                        '<p>' +
+                        '<b>📅 Year:</b> ' +
+                        data.year +
+                        '</p>' +
+
+                        '<p>' +
+                        '<b>📖 Section:</b> ' +
+                        data.section +
+                        '</p>';
+
+                })
+
+
+                .catch(error => {
+
+                    result.innerHTML =
+                        '<p class="error">' +
+                        '❌ Unable to retrieve student data.' +
+                        '</p>';
+
+                    console.error(error);
+
+                });
+
+        }
+
+
+
+        /* ==========================================
+           GREETING API
+           ========================================== */
+
+        function sayHello() {
+
+            const name =
+                document
+                .getElementById('nameInput')
+                .value
+                .trim();
+
+
+            const greeting =
+                document.getElementById('greeting');
+
+
+            if (name === '') {
+
+                greeting.innerText =
+                    '⚠️ Please enter your first name.';
+
+
+                greeting.style.backgroundColor =
+                    '#fff3e0';
+
+                greeting.style.borderLeftColor =
+                    '#fb8c00';
+
+                greeting.style.color =
+                    '#e65100';
+
+                return;
+
+            }
+
+
+            greeting.innerText =
+                '⏳ Getting your greeting...';
+
+
+            greeting.style.backgroundColor =
+                '#e3f2fd';
+
+            greeting.style.borderLeftColor =
+                '#1976d2';
+
+            greeting.style.color =
+                '#0d47a1';
+
+
+            fetch(
+                '/hello?name=' +
+                encodeURIComponent(name)
+            )
+
+
+                .then(response => {
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            'Failed to retrieve greeting.'
+                        );
+
+                    }
+
+                    return response.json();
+
+                })
+
+
+                .then(data => {
+
+                    greeting.innerText =
+                        '🎉 ' + data.message;
+
+
+                    greeting.style.backgroundColor =
+                        '#e8f5e9';
+
+                    greeting.style.borderLeftColor =
+                        '#43a047';
+
+                    greeting.style.color =
+                        '#2e7d32';
+
+                })
+
+
+                .catch(error => {
+
+                    greeting.innerText =
+                        '❌ Unable to retrieve greeting.';
+
+
+                    greeting.style.backgroundColor =
+                        '#ffebee';
+
+                    greeting.style.borderLeftColor =
+                        '#e53935';
+
+                    greeting.style.color =
+                        '#c62828';
+
+                    console.error(error);
+
+                });
+
+        }
+
+
+
+        /* ==========================================
+           CUSTOM COURSE API
+           ========================================== */
+
+        function loadCourse() {
+
+            const courseResult =
+                document.getElementById('courseResult');
+
+
+            courseResult.innerHTML =
+                '<p class="loading">' +
+                '⏳ Loading course information...' +
+                '</p>';
+
+
+            fetch('/course')
+
+
+                .then(response => {
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            'Failed to retrieve course data.'
+                        );
+
+                    }
+
+                    return response.json();
+
+                })
+
+
+                .then(data => {
+
+                    courseResult.innerHTML =
+
+                        '<p>' +
+                        '<b>📘 Course Code:</b> ' +
+                        data.course_code +
+                        '</p>' +
+
+                        '<p>' +
+                        '<b>📚 Course Title:</b> ' +
+                        data.course_title +
+                        '</p>' +
+
+                        '<p>' +
+                        '<b>👨‍🏫 Instructor:</b> ' +
+                        data.instructor +
+                        '</p>';
+
+                })
+
+
+                .catch(error => {
+
+                    courseResult.innerHTML =
+                        '<p class="error">' +
+                        '❌ Unable to retrieve course information.' +
+                        '</p>';
+
+                    console.error(error);
+
+                });
+
+        }
+
+
+
+        /* ==========================================
+           STUDENTS FROM SQLITE DATABASE
+           ========================================== */
+
+        function loadStudents() {
+
+            const studentList =
+                document.getElementById('studentList');
+
+
+            studentList.innerHTML =
+                '<p class="loading">' +
+                '⏳ Loading students from database...' +
+                '</p>';
+
+
+            fetch('/students')
+
+
+                .then(response => {
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            'Failed to retrieve student records.'
+                        );
+
+                    }
+
+                    return response.json();
+
+                })
+
+
+                .then(data => {
+
+                    let output = '';
+
+
+                    if (data.length === 0) {
+
+                        output =
+                            '<p>No student records found.</p>';
+
+                    }
+
+                    else {
+
+                        data.forEach(student => {
+
+                            output +=
+
+                                '<div class="student-item">' +
+
+                                '<p>' +
+                                '<b>🆔 Student ID:</b> ' +
+                                esc(student.student_id) +
+                                '</p>' +
+
+                                '<p>' +
+                                '<b>👤 Name:</b> ' +
+                                esc(student.name) +
+                                '</p>' +
+
+                                '<p>' +
+                                '<b>💻 Program:</b> ' +
+                                esc(student.program) +
+                                '</p>' +
+
+                                '<p>' +
+                                '<b>📅 Year:</b> ' +
+                                esc(student.year) +
+                                '</p>' +
+
+                                '<p>' +
+                                '<b>📖 Section:</b> ' +
+                                esc(student.section) +
+                                '</p>' +
+
+                                '<p>' +
+                                '<b>🏷️ Source:</b> ' +
+                                esc(student.source || 'Local') +
+                                '</p>' +
+
+                                '</div>';
+
+                        });
+
+                    }
+
+
+                    studentList.innerHTML = output;
+
+                })
+
+
+                .catch(error => {
+
+                    studentList.innerHTML =
+                        '<p class="database-error">' +
+                        '❌ Unable to retrieve student records.' +
+                        '</p>';
+
+                    console.error(error);
+
+                });
+
+        }
+
+
+
+        /* ==========================================
+           ENTER KEY SUPPORT
+           ========================================== */
+
+        document
+            .getElementById('nameInput')
+            .addEventListener(
+                'keypress',
+                function(event) {
+
+                    if (event.key === 'Enter') {
+
+                        sayHello();
+
+                    }
+
+                }
+            );
+
+
+    
+
+        /* ==========================================
+           LABORATORY ACTIVITIES 7 TO 9
+           ========================================== */
+
+        const state = {records: [], partner: [], editingId: null};
+
+        const JSON_HEADERS = {'Content-Type': 'application/json'};
+
+
+        // Student text is shown as plain text, never as HTML.
+        function esc(value) {
+
+            return String(value === undefined || value === null ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+
+        }
+
+
+        function el(tag, className, text) {
+
+            const node = document.createElement(tag);
+
+            if (className) { node.className = className; }
+            if (text !== undefined) { node.textContent = text; }
+
+            return node;
+
+        }
+
+
+        function showMessage(id, text, type) {
+
+            const box = document.getElementById(id);
+
+            box.textContent = text;
+            box.className = 'message ' + (type || 'info');
+
+        }
+
+
+        function sourceBadge(source) {
+
+            const label = source || 'Local';
+
+            const kind =
+                label === 'Local' ? 'local' :
+                label === 'Classmate API' ? 'classmate' : 'external';
+
+            return el('span', 'badge ' + kind, label);
+
+        }
+
+
+        async function callApi(url, options) {
+
+            const response = await fetch(url, options);
+
+            let data = null;
+
+            try { data = await response.json(); } catch (error) { /* not JSON */ }
+
+            if (!response.ok) {
+
+                throw new Error(
+                    (data && (data.error || data.message)) ||
+                    'Request failed (' + response.status + ').'
+                );
+
+            }
+
+            return data;
+
+        }
+
+
+        async function whileBusy(button, action) {
+
+            const label = button ? button.textContent : '';
+
+            if (button) { button.disabled = true; button.textContent = '⏳ Please wait...'; }
+
+            try { await action(); }
+
+            finally {
+
+                if (button) { button.disabled = false; button.textContent = label; }
+
+            }
+
+        }
+
+
+        // A pop-up inside the page instead of the browser's plain confirm box.
+        function askConfirm(title, text, okLabel, danger) {
+
+            return new Promise(resolve => {
+
+                const finish = answer => {
+
+                    document.removeEventListener('keydown', onKey);
+                    backdrop.remove();
+                    resolve(answer);
+
+                };
+
+                const onKey = event => { if (event.key === 'Escape') { finish(false); } };
+
+                const cancel = el('button', 'secondary', 'Cancel');
+                const ok = el('button', danger ? 'danger' : '', okLabel || 'OK');
+
+                cancel.type = 'button';
+                ok.type = 'button';
+                cancel.onclick = () => finish(false);
+                ok.onclick = () => finish(true);
+
+                const box = el('div', 'modal-box');
+                const actions = el('div', 'modal-actions');
+
+                actions.append(cancel, ok);
+                box.append(el('h3', '', title), el('p', '', text), actions);
+                box.setAttribute('role', 'dialog');
+                box.setAttribute('aria-modal', 'true');
+
+                const backdrop = el('div', 'modal-backdrop');
+
+                backdrop.onclick = event => { if (event.target === backdrop) { finish(false); } };
+                backdrop.appendChild(box);
+
+                document.addEventListener('keydown', onKey);
+                document.body.appendChild(backdrop);
+                cancel.focus();
+
             });
-        }}, 'Send to partner')), out);
-    openSheet('Send a record', el);
-}
-$('#bSend').onclick = sendSheet;
 
-/* ---------- explorer (Lab 7 endpoints) ---------- */
-function explorer() {
-    const out = h('div', {}), inputs = h('div', {class: 'form'});
-    const defs = {
-        all: {label: 'GET /students', fields: [], path: () => '/students'},
-        one: {label: 'GET /students/<id>', fields: [['id', 'Database ID', '2']], path: v => '/students/' + (Number(v.id) || 1)},
-        filter: {label: 'GET /students/filter', fields: [['program', 'Program', 'BSED'], ['year', 'Year', ''], ['section', 'Section', '']],
-                 path: v => '/students/filter?' + new URLSearchParams(Object.entries(v).filter(([, x]) => x)).toString()},
-        api: {label: 'GET /api/students', fields: [], path: () => '/api/students'}
-    };
-    let cur = 'all', vals = {};
-    const eps = h('div', {class: 'eps'});
-    const draw = () => {
-        eps.replaceChildren(...Object.entries(defs).map(([k, d]) => h('button', {class: 'pill ghost sm' + (k === cur ? ' on' : ''), onclick: () => { cur = k; draw(); }}, d.label)));
-        vals = {}; inputs.replaceChildren(...defs[cur].fields.map(([k, label, v]) => { const i = h('input', {type: 'text', value: v}); vals[k] = i; return h('label', {}, h('span', {}, label), i); }),
-            h('div', {class: 'row'}, h('button', {class: 'pill rose', onclick: run}, 'Run')));
-    };
-    const run = async () => {
-        const v = Object.fromEntries(Object.entries(vals).map(([k, i]) => [k, i.value.trim()])), path = defs[cur].path(v), t0 = performance.now();
-        out.replaceChildren(h('div', {class: 'soft'}, 'Calling ' + path + ' …'));
-        try {
-            const r = await fetch(path), text = await r.text(); let body = text; try { body = JSON.stringify(JSON.parse(text), null, 2); } catch (e) { /* raw */ }
-            out.replaceChildren(h('div', {}, h('span', {class: 'stat ' + (r.ok ? 'ok' : 'bad')}, `${r.status} ${r.statusText || ''}`), h('span', {class: 'soft mono', style: 'margin-left:10px'}, `${path} · ${Math.round(performance.now() - t0)} ms`)), h('pre', {class: 'code mono'}, body));
-        } catch (e) { out.replaceChildren(h('span', {class: 'stat bad'}, 'Network error'), h('pre', {class: 'code'}, e.message)); }
-    };
-    draw(); openSheet('API explorer', h('p', {class: 'soft', style: 'margin-top:0'}, 'Try the Lab 7 endpoints against students.db.'), eps, inputs, out);
-}
-$('#bTools').onclick = explorer;
+        }
 
-/* ---------- share my API ---------- */
-$('#bShare').onclick = async () => {
-    const url = location.origin + '/api/students';
-    try {
-        if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) await navigator.share({title: 'My Student API', url});
-        else await navigator.clipboard.writeText(url);
-        toast('Your API URL: ' + url);
-    } catch (e) { if (e.name === 'AbortError') return; window.prompt('Copy your API URL:', url); }
-};
-$('#bNew').onclick = () => form(null);
 
-/* ---------- boot + auto-refresh ---------- */
-load();
-setInterval(() => { if (!document.hidden && !sheetOpen() && !$('.dim')) load(true); }, 10000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden && !sheetOpen()) load(true); });
-</script>
+        // One student as a card: name, source label, details and optional buttons.
+        function studentItem(student, buttons) {
+
+            const item = el('div', 'student-item');
+            const head = el('div', 'record-head');
+
+            head.append(el('strong', '', student.name || 'N/A'), sourceBadge(student.source));
+
+            item.append(
+                head,
+                el('p', 'record-meta',
+                    '🆔 ' + (student.student_id || 'N/A') + '  ·  💻 ' + (student.program || 'N/A') +
+                    '  ·  📅 Year ' + (student.year ?? 'N/A') + '  ·  📖 Section ' + (student.section || 'N/A'))
+            );
+
+            (buttons || []).forEach(([label, handler, kind]) => {
+
+                const button = el('button', 'small ' + (kind || ''), label);
+
+                button.type = 'button';
+                button.onclick = () => handler(student, button);
+                item.appendChild(button);
+
+            });
+
+            return item;
+
+        }
+
+
+        function showDetails(student, boxId) {
+
+            const box = document.getElementById(boxId);
+            const list = el('dl');
+
+            [
+                ['Student ID', student.student_id], ['Name', student.name],
+                ['Program', student.program], ['Year', student.year],
+                ['Section', student.section], ['Database ID', student.id],
+                ['Source', student.source || 'not provided']
+            ].forEach(([label, value]) => {
+
+                list.append(el('dt', '', label), el('dd', '', value ?? 'N/A'));
+
+            });
+
+            const close = el('button', 'secondary small', 'Close');
+
+            close.type = 'button';
+            close.onclick = () => box.replaceChildren();
+
+            box.replaceChildren(el('h3', '', '🔍 ' + (student.name || 'Student details')), list, close);
+            box.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+
+        }
+
+
+        /* ----- Lab 7: students by program ----- */
+
+        async function loadProgram() {
+
+            const program = document.getElementById('programInput').value.trim();
+            const box = document.getElementById('programResults');
+
+            if (!program) { box.textContent = 'Type a program first.'; return; }
+
+            box.textContent = '⏳ Searching...';
+
+            try {
+
+                const rows = await callApi('/students/program/' + encodeURIComponent(program));
+
+                box.replaceChildren(...(rows.length
+                    ? rows.map(student => studentItem(student))
+                    : [el('p', '', 'No students found in ' + program + '.')]));
+
+            } catch (error) {
+
+                box.replaceChildren(el('p', 'database-error', '❌ ' + error.message));
+
+            }
+
+        }
+
+
+        /* ----- Lab 8: my records, create, update, delete ----- */
+
+        async function loadMyRecords(silent) {
+
+            try {
+
+                state.records = await callApi('/api/students');
+                renderMyRecords();
+                updateDashboard();
+
+            } catch (error) {
+
+                if (!silent) {
+                    document.getElementById('myRecords')
+                        .replaceChildren(el('p', 'database-error', '❌ ' + error.message));
+                }
+
+            }
+
+        }
+
+
+        function renderMyRecords() {
+
+            const words = document.getElementById('searchInput').value.toLowerCase().trim();
+
+            const rows = state.records.filter(student =>
+                !words || [student.name, student.student_id, student.program]
+                    .some(value => String(value).toLowerCase().includes(words)));
+
+            document.getElementById('myRecords').replaceChildren(...(rows.length
+                ? rows.map(student => studentItem(student, [
+                    ['🔍 View', s => showDetails(s, 'myDetails')],
+                    ['✏️ Edit', s => editStudent(s)],
+                    ['🗑️ Delete', s => deleteStudent(s), 'danger']
+                ]))
+                : [el('p', '', 'No records found.')]));
+
+        }
+
+
+        function resetForm() {
+
+            document.getElementById('studentForm').reset();
+            state.editingId = null;
+            document.getElementById('formTitle').textContent = '➕ Add a Student';
+            document.getElementById('saveButton').textContent = '➕ Add Student';
+            document.getElementById('cancelButton').hidden = true;
+
+        }
+
+
+        function editStudent(student) {
+
+            state.editingId = student.id;
+
+            document.getElementById('fStudentId').value = student.student_id;
+            document.getElementById('fName').value = student.name;
+            document.getElementById('fProgram').value = student.program;
+            document.getElementById('fYear').value = student.year;
+            document.getElementById('fSection').value = student.section;
+
+            document.getElementById('formTitle').textContent = '✏️ Edit Student #' + student.id;
+            document.getElementById('saveButton').textContent = '💾 Update Student';
+            document.getElementById('cancelButton').hidden = false;
+
+            document.getElementById('formCard').scrollIntoView({behavior: 'smooth'});
+
+        }
+
+
+        async function saveStudent(event) {
+
+            event.preventDefault();
+
+            const editing = state.editingId !== null;
+
+            const body = {
+                student_id: document.getElementById('fStudentId').value.trim(),
+                name: document.getElementById('fName').value.trim(),
+                program: document.getElementById('fProgram').value.trim(),
+                year: Number(document.getElementById('fYear').value),
+                section: document.getElementById('fSection').value.trim(),
+                source: 'Local'
+            };
+
+            try {
+
+                const result = await callApi(
+                    editing ? '/api/students/' + state.editingId : '/api/students',
+                    {method: editing ? 'PUT' : 'POST', headers: JSON_HEADERS, body: JSON.stringify(body)}
+                );
+
+                showMessage('formMessage', '✅ ' + result.message, 'ok');
+                resetForm();
+                await loadMyRecords();
+
+            } catch (error) {
+
+                showMessage('formMessage', '❌ ' + error.message, 'bad');
+
+            }
+
+        }
+
+
+        async function deleteStudent(student) {
+
+            const yes = await askConfirm(
+                'Delete this record?',
+                student.name + ' (' + student.student_id + ') will be removed from your database. ' +
+                'This cannot be undone.',
+                'Delete', true
+            );
+
+            if (!yes) { return; }
+
+            try {
+
+                const result = await callApi('/api/students/' + student.id, {method: 'DELETE'});
+
+                showMessage('formMessage', '✅ ' + result.message, 'ok');
+                document.getElementById('myDetails').replaceChildren();
+                await loadMyRecords();
+
+            } catch (error) {
+
+                showMessage('formMessage', '❌ ' + error.message, 'bad');
+
+            }
+
+        }
+
+
+        /* ----- Lab 8 and 9: the hardcoded partner's records ----- */
+
+        async function retrievePartner(button) {
+
+            await whileBusy(button, async () => {
+
+                showMessage('partnerMessage',
+                    '⏳ Retrieving... a sleeping Render app can take up to a minute.', 'info');
+
+                try {
+
+                    const rows = await callApi('/partner-records');
+
+                    state.partner = rows;
+                    document.getElementById('remoteDetails').replaceChildren();
+
+                    document.getElementById('partnerRecords').replaceChildren(...(rows.length
+                        ? rows.map(student => studentItem(student, [
+                            ['🔍 View', s => showDetails(s, 'remoteDetails')],
+                            ['💾 Save to My Database', (s, b) => savePartner(s, b)]
+                        ]))
+                        : [el('p', '', 'The partner has no records.')]));
+
+                    showMessage('partnerMessage', '✅ Retrieved ' + rows.length + ' record(s).', 'ok');
+                    updateDashboard();
+
+                } catch (error) {
+
+                    showMessage('partnerMessage', '❌ ' + error.message, 'bad');
+
+                }
+
+            });
+
+        }
+
+
+        async function savePartner(student, button) {
+
+            await whileBusy(button, async () => {
+
+                try {
+
+                    const result = await callApi('/import-student', {
+                        method: 'POST', headers: JSON_HEADERS, body: JSON.stringify(student)
+                    });
+
+                    showMessage('partnerMessage', '✅ ' + result.message +
+                        ' — ' + student.name + ' is now in My Records as "Classmate API".', 'ok');
+                    await loadMyRecords();
+
+                } catch (error) {
+
+                    showMessage('partnerMessage', '❌ ' + error.message, 'bad');
+
+                }
+
+            });
+
+        }
+
+
+        /* ----- Lab 9: send one practice record ----- */
+
+        const STATUS_TEXT = {200: 'OK', 201: 'Created', 400: 'Bad Request', 404: 'Not Found', 409: 'Conflict',
+                             500: 'Server Error', 502: 'Bad Gateway'};
+
+
+        function replyOf(raw) {
+
+            if (typeof raw === 'string') {
+
+                try { return JSON.parse(raw); } catch (error) { return {message: raw}; }
+
+            }
+
+            return raw || {};
+
+        }
+
+
+        function showReceipt(sent, status, raw) {
+
+            const reply = replyOf(raw);
+            const storedId = reply.id ?? (reply.student && reply.student.id);
+
+            const table = el('table');
+
+            [
+                ['Student ID', sent.student_id], ['Name', sent.name], ['Program', sent.program],
+                ['Year', sent.year], ['Section', sent.section], ['Source', 'Partner API']
+            ].forEach(([label, value]) => {
+
+                const row = el('tr');
+
+                row.append(el('td', '', label), el('td', '', value));
+                table.appendChild(row);
+
+            });
+
+            const receipt = el('div', 'receipt');
+
+            receipt.append(
+                el('h3', '', '✅ Record sent to partner'),
+                el('div', '', 'Partner replied ' + status + ' ' + (STATUS_TEXT[status] || '')),
+                table,
+                el('p', '', (reply.message || reply.error || 'No message') +
+                    (storedId !== undefined ? ' (stored as ID ' + storedId + ')' : ''))
+            );
+
+            document.getElementById('sendResult').replaceChildren(receipt);
+
+        }
+
+
+        async function sendRecord(button) {
+
+            const record = {
+                student_id: document.getElementById('sId').value.trim(),
+                name: document.getElementById('sName').value.trim(),
+                program: document.getElementById('sProgram').value.trim(),
+                year: Number(document.getElementById('sYear').value),
+                section: document.getElementById('sSection').value.trim()
+            };
+
+            if (!record.student_id || !record.name || !record.program || !record.section || !(record.year >= 1)) {
+
+                showMessage('sendMessage', '❌ Fill in every field of the record first.', 'bad');
+                return;
+
+            }
+
+            const yes = await askConfirm(
+                'Send this record?',
+                record.name + ' (' + record.student_id + ') will be sent to the partner API. ' +
+                'Only send to your assigned partner.',
+                'Send'
+            );
+
+            if (!yes) { return; }
+
+            document.getElementById('sendResult').replaceChildren();
+
+            await whileBusy(button, async () => {
+
+                try {
+
+                    const response = await fetch('/send-record', {
+                        method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({record: record})
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'The partner did not accept the record.');
+                    }
+
+                    showMessage('sendMessage', '', 'ok');
+                    showReceipt(data.sent, data.partner_status, data.partner_response);
+
+                } catch (error) {
+
+                    showMessage('sendMessage', '❌ ' + error.message, 'bad');
+
+                }
+
+            });
+
+        }
+
+
+        /* ----- Lab 9: dashboard ----- */
+
+        function updateDashboard() {
+
+            const local = state.records.filter(s => (s.source || 'Local') === 'Local').length;
+
+            document.getElementById('dLocal').textContent = local;
+            document.getElementById('dImported').textContent = state.records.length - local;
+            document.getElementById('dPartner').textContent = state.partner.length;
+
+        }
+
+
+        /* ----- start-up and automatic refresh (every 10 seconds) ----- */
+
+        loadMyRecords();
+
+        setInterval(() => {
+
+            const busy = document.querySelector('.modal-backdrop') || state.editingId !== null;
+
+            if (!document.hidden && !busy) { loadMyRecords(true); }
+
+        }, 10000);
+
+    </script>
+
+
 </body>
+
 </html>

@@ -1,6 +1,6 @@
 # Laboratory Activity 10 — AWS Lightsail deployment: noemi
 
-Folder: `noemi-act-10`  ·  Partner for the AWS-to-AWS task: **jingjing** (same pairing as Lab 9; change it if your teacher assigned someone else)
+Folder: `noemi-act-10`  ·  Partner for the AWS-to-AWS task: **Rochelle Ann** (hardcoded in app.py as http://3.0.106.1/api/students) (same pairing as Lab 9; change it if your teacher assigned someone else)
 
 > **Nothing here has been committed or pushed.** This folder is a ready copy of the Lab 9 app plus the Lab 10 files.
 > When you decide to publish, make the repo `noemi-act-10` (or reuse your existing repo) and push it yourself.
@@ -18,10 +18,9 @@ Folder: `noemi-act-10`  ·  Partner for the AWS-to-AWS task: **jingjing** (same 
 
 ## The code change for the Additional Task
 
-In Lab 9 the app only accepted `https://<name>.onrender.com`. Lab 10 needs it to fetch your partner's **AWS Static IP or domain**.
-`app.py` now accepts `http://` or `https://` addresses that end in `/api/students`, for example `http://203.0.113.10/api/students`.
-It only accepts **public** addresses. Loopback, private and link-local ranges are refused, including `169.254.169.254`,
-the AWS metadata address, so the server can't be tricked into reading its own cloud credentials. Render URLs still work.
+In Lab 9 the partner address was a Render URL. Lab 10 needs your partner's **AWS Static IP**.
+The partner address is written in `app.py` (`PARTNER_URL`), as in Lab 9, and now points to `http://3.0.106.1/api/students` (Rochelle Ann's server).
+Change that one line if your partner changes, push, and run `deploy/update_from_github.sh` on the server.
 
 ## Step by step (matches the lab)
 
@@ -41,16 +40,16 @@ pwd
 **Steps 4–11 — option A, one script** (after cloning, or paste the script):
 ```
 cd ~
-git clone https://github.com/YOUR-GITHUB-USERNAME/noemi-act-10.git
+git clone https://github.com/defactonoeme-bit/noemi-act-10.git
 cd noemi-act-10
-bash deploy/setup_server.sh https://github.com/YOUR-GITHUB-USERNAME/noemi-act-10.git
+bash deploy/setup_server.sh https://github.com/defactonoeme-bit/noemi-act-10.git
 ```
 
 **Steps 4–11 — option B, manually** (what the lab shows):
 ```
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y python3 python3-pip python3-venv git nginx
-cd ~ && git clone https://github.com/YOUR-GITHUB-USERNAME/noemi-act-10.git && cd noemi-act-10
+cd ~ && git clone https://github.com/defactonoeme-bit/noemi-act-10.git && cd noemi-act-10
 python3 -m venv venv && source venv/bin/activate
 pip install --upgrade pip && pip install -r requirements.txt
 python init_db.py            # only if students.db is missing
@@ -71,7 +70,7 @@ sudo nginx -t && sudo systemctl restart nginx && sudo systemctl enable nginx
 
 **Step 15–16** — send your partner only `http://YOUR-STATIC-IP/api/students`. To update after a push: `bash ~/noemi-act-10/deploy/update_from_github.sh`.
 
-**Additional Task** — in your page's partner box enter `http://PARTNER-STATIC-IP/api/students` (your partner is **jingjing**), retrieve, view a record, save one,
+**Additional Task** — press **Retrieve Classmate's Records** (the partner `http://3.0.106.1/api/students` is already set in `app.py`; your partner is **Rochelle Ann**), retrieve, view a record, save one,
 then reload and confirm the saved record is still there.
 
 ## Screenshots to submit (take them yourself, from your own AWS account)
